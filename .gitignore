@@ -1,0 +1,39 @@
+# Dependências
+node_modules/
+.pnp.*
+.yarn/
+
+# Build
+dist/
+dist-ssr/
+build/
+*.local
+
+# Ambiente
+.env
+.env.*
+!.env.example
+
+# Editores / SO
+.vscode/*
+!.vscode/extensions.json
+.idea/
+.DS_Store
+Thumbs.db
+
+# Testes
+coverage/
+.vitest/
+
+# Python (geração de documentos fictícios)
+__pycache__/
+*.pyc
+.venv/
+venv/
+
+# Auditoria interna — NÃO faz parte do escopo da entrega.
+# Relatório do agente auditor, produzido para controle do candidato.
+auditoria/
+
+# Sessões/worktrees do agente
+.claude/worktrees/
