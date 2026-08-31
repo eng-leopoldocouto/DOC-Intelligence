@@ -1,0 +1,492 @@
+openapi: 3.1.0
+info:
+  title: DOC Intelligence — API
+  version: 1.0.0
+  description: |
+    Contrato entre a interface do atendimento (Trilha B) e o serviço de
+    inteligência documental (Trilha A).
+
+    Este contrato é **definido pelo front-end** e servido por mock. Ele é a
+    fonte de verdade dos tipos TypeScript do cliente, gerados por
+    `npm run gen:api`.
+
+    ## Princípios
+
+    - **Assíncrono por obrigação.** O modelo leva de 5 a 40 s e é cobrado por
+      documento. Nenhuma operação bloqueia esperando o modelo.
+    - **O front-end não conhece tipos de documento.** Todo schema de campo vem
+      de `GET /tipos-documento`.
+    - **Identidade vem do host interno**, por cabeçalho. O serviço não faz
+      login.
+    - **Erros em RFC 9457** (`application/problem+json`).
+servers:
+  - url: /api/v1
+
+security:
+  - tokenDeServico: []
+
+tags:
+  - name: Documentos
+  - name: Conferência
+  - name: Catálogo
+
+paths:
+  /documentos:
+    post:
+      tags: [Documentos]
+      summary: Envia um documento para processamento
+      description: |
+        Responde **202** com o documento em `RECEBIDO`. O processamento é
+        assíncrono; acompanhe por `GET /documentos/status`.
+
+        Se `contentHash` já existir, responde **200** com `duplicado: true` e o
+        documento existente. **Nenhuma chamada ao modelo é disparada** — é o
+        tratamento do fato (c) combinado com o custo do fato (a).
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              required: [arquivo, contentHash, nomeOrigem]
+              properties:
+                arquivo:
+                  type: string
+                  format: binary
+                contentHash:
+                  type: string
+                  pattern: '^[a-f0-9]{64}$'
+                  description: SHA-256 do conteúdo, calculado no cliente
+                nomeOrigem:
+                  type: string
+                  description: |
+                    Nome como o arquivo chegou. Metadado de origem, nunca
+                    identificador.
+                  example: WhatsApp Image 2026-08-11 at 09.12.33.jpeg
+      responses:
+        '202':
+          description: Aceito para processamento
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/RespostaEnvio' }
+        '200':
+          description: Documento duplicado — já existia
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/RespostaEnvio' }
+        '415': { $ref: '#/components/responses/Problema' }
+        '413': { $ref: '#/components/responses/Problema' }
+
+    get:
+      tags: [Documentos]
+      summary: Lista documentos com paginação por cursor
+      parameters:
+        - { name: estado,  in: query, schema: { $ref: '#/components/schemas/EstadoDocumento' } }
+        - { name: cursor,  in: query, schema: { type: string } }
+        - { name: limite,  in: query, schema: { type: integer, default: 50, maximum: 200 } }
+      responses:
+        '200':
+          description: Página de documentos
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/PaginaDeDocumentos' }
+
+  /documentos/status:
+    get:
+      tags: [Documentos]
+      summary: Estado de vários documentos numa única requisição
+      description: |
+        Existe por causa do fato (e). Com 800 documentos em acompanhamento, um
+        polling por documento geraria centenas de requisições por segundo
+        vindas de um único navegador.
+      parameters:
+        - name: ids
+          in: query
+          required: true
+          schema: { type: array, items: { type: string }, maxItems: 500 }
+          style: form
+          explode: false
+      responses:
+        '200':
+          description: Estados
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [itens]
+                properties:
+                  itens:
+                    type: array
+                    items: { $ref: '#/components/schemas/StatusResumido' }
+
+  /documentos/{id}:
+    parameters:
+      - { name: id, in: path, required: true, schema: { type: string } }
+    get:
+      tags: [Documentos]
+      summary: Consulta um documento
+      responses:
+        '200':
+          description: Documento
+          headers:
+            ETag:
+              schema: { type: string }
+              description: Versão, para uso em `If-Match`
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Documento' }
+        '404': { $ref: '#/components/responses/Problema' }
+
+  /documentos/{id}/arquivo:
+    parameters:
+      - { name: id, in: path, required: true, schema: { type: string } }
+    get:
+      tags: [Documentos]
+      summary: URL assinada e de curta duração do arquivo original
+      description: |
+        Nunca devolve URL permanente. Tratamento do fato (d): a imagem é
+        efêmera para o cliente, e um link vazado expira sozinho.
+      responses:
+        '200':
+          description: URL temporária
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [url, expiraEm]
+                properties:
+                  url:      { type: string, format: uri }
+                  expiraEm: { type: string, format: date-time }
+
+  /documentos/{id}/reprocessar:
+    parameters:
+      - { name: id, in: path, required: true, schema: { type: string } }
+    post:
+      tags: [Documentos]
+      summary: Reprocessa um documento — ação explícita e cobrada
+      description: |
+        **Nunca chamada automaticamente pelo cliente.** Cada execução custa uma
+        chamada ao modelo (fato a). A interface exige confirmação humana que
+        informa o custo antes de acionar.
+      responses:
+        '202':
+          description: Reprocessamento aceito
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Documento' }
+        '409':
+          description: Estado não permite reprocessamento
+          content:
+            application/problem+json:
+              schema: { $ref: '#/components/schemas/Problema' }
+
+  /documentos/{id}/conferencia/claim:
+    parameters:
+      - { name: id, in: path, required: true, schema: { type: string } }
+    post:
+      tags: [Conferência]
+      summary: Reserva o documento para conferência
+      description: |
+        Tratamento do fato (g), parte 1 — evita que duas pessoas confiram o
+        mesmo documento. A reserva expira sozinha por TTL, porque a aba fechada
+        sem aviso é o caso normal, não a exceção.
+      responses:
+        '200':
+          description: Reserva concedida ou renovada
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Reserva' }
+        '409':
+          description: Já reservado por outra pessoa
+          content:
+            application/problem+json:
+              schema: { $ref: '#/components/schemas/Problema' }
+    delete:
+      tags: [Conferência]
+      summary: Libera a reserva
+      responses:
+        '204': { description: Liberada }
+
+  /documentos/{id}/campos:
+    parameters:
+      - { name: id, in: path, required: true, schema: { type: string } }
+      - name: If-Match
+        in: header
+        required: true
+        schema: { type: string }
+        description: |
+          Versão do documento como carregada pelo cliente. Tratamento do fato
+          (g), parte 2 — impede que a gravação de uma pessoa apague em silêncio
+          a da outra.
+    patch:
+      tags: [Conferência]
+      summary: Grava correções e conclui a conferência
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [campos]
+              properties:
+                campos:
+                  type: array
+                  items:
+                    type: object
+                    required: [chave, valor]
+                    properties:
+                      chave: { type: string }
+                      valor: { type: string, nullable: true }
+                nomePadronizado:
+                  type: string
+                  description: Editável pelo conferente (premissa P4)
+      responses:
+        '200':
+          description: Gravado; documento vai para PRONTO
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Documento' }
+        '409':
+          description: |
+            Conflito de versão. O corpo traz o documento atual para que a
+            interface mostre o que mudou e **quem** mudou. O cliente nunca
+            resolve sozinho.
+          content:
+            application/problem+json:
+              schema: { $ref: '#/components/schemas/ProblemaDeConflito' }
+        '412': { $ref: '#/components/responses/Problema' }
+
+  /documentos/{id}/rejeitar:
+    parameters:
+      - { name: id, in: path, required: true, schema: { type: string } }
+    post:
+      tags: [Conferência]
+      summary: Rejeita o documento com motivo
+      description: |
+        Derivado do fato (b) — uma foto ilegível precisa ter saída do sistema.
+        Rejeitar **não** dispara reprocessamento.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [motivo]
+              properties:
+                motivo:
+                  type: string
+                  enum: [ILEGIVEL, TIPO_INCORRETO, INCOMPLETO, NAO_E_DOCUMENTO, OUTRO]
+                observacao: { type: string }
+      responses:
+        '200':
+          description: Rejeitado
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Documento' }
+
+  /tipos-documento:
+    get:
+      tags: [Catálogo]
+      summary: Catálogo de tipos e seus schemas de campo
+      description: |
+        **O endpoint que sustenta o fato (f).** O front-end não conhece nenhum
+        tipo de documento; ele os recebe daqui, com rótulos, tipos de dado,
+        máscaras, obrigatoriedade e ordem. Adicionar um tipo novo ao produto é
+        mudança de zero linhas no front-end.
+      responses:
+        '200':
+          description: Catálogo
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [itens, limiarConfiancaPadrao]
+                properties:
+                  itens:
+                    type: array
+                    items: { $ref: '#/components/schemas/TipoDocumento' }
+                  limiarConfiancaPadrao:
+                    type: number
+                    minimum: 0
+                    maximum: 1
+                    description: |
+                      O limiar mora aqui, e não no front-end, porque será
+                      calibrado com uso real — e calibrar não pode exigir
+                      deploy da interface.
+
+components:
+  securitySchemes:
+    tokenDeServico:
+      type: http
+      scheme: bearer
+      description: |
+        Token do sistema interno que hospeda a interface. A identidade da
+        **pessoa** vem no cabeçalho `X-Usuario-Id` / `X-Usuario-Nome`, injetado
+        pelo host. O serviço não faz login — ver ADR-011.
+
+  responses:
+    Problema:
+      description: Erro em RFC 9457
+      content:
+        application/problem+json:
+          schema: { $ref: '#/components/schemas/Problema' }
+
+  schemas:
+    EstadoDocumento:
+      type: string
+      enum:
+        - RECEBIDO
+        - EM_PROCESSAMENTO
+        - AGUARDANDO_CONFERENCIA
+        - EM_CONFERENCIA
+        - PRONTO
+        - FALHOU
+        - EXPIRADO
+        - REJEITADO
+
+    TipoDeDado:
+      type: string
+      enum: [TEXTO, DATA, CPF, CNPJ, NUMERO, SELECAO]
+      description: |
+        Seis tipos de dado contra N tipos de documento. É essa razão que torna
+        barata a troca prevista no fato (f).
+
+    Documento:
+      type: object
+      required: [id, contentHash, nomeOrigem, estado, versao, recebidoEm, campos]
+      properties:
+        id:               { type: string, description: Identificador opaco. Nunca um dado pessoal }
+        contentHash:      { type: string, description: SHA-256. A identidade real do documento }
+        nomeOrigem:       { type: string, description: Como chegou. Metadado, nunca identificador }
+        nomePadronizado:  { type: string, nullable: true }
+        tipoDocumentoId:  { type: string, nullable: true }
+        estado:           { $ref: '#/components/schemas/EstadoDocumento' }
+        confianca:        { type: number, nullable: true, minimum: 0, maximum: 1 }
+        campos:
+          type: array
+          items: { $ref: '#/components/schemas/CampoExtraido' }
+        versao:           { type: integer, description: Trava otimista; vai no If-Match }
+        reserva:          { $ref: '#/components/schemas/Reserva' }
+        procedencia:      { $ref: '#/components/schemas/Procedencia' }
+        recebidoEm:       { type: string, format: date-time }
+        motivoFalha:      { type: string, nullable: true }
+
+    CampoExtraido:
+      type: object
+      required: [chave, valor, confianca, origem]
+      properties:
+        chave:     { type: string }
+        valor:     { type: string, nullable: true }
+        confianca: { type: number, minimum: 0, maximum: 1 }
+        origem:
+          type: string
+          enum: [MODELO, HUMANO]
+          description: Vira HUMANO quando corrigido na conferência
+
+    TipoDocumento:
+      type: object
+      required: [id, rotulo, campos]
+      properties:
+        id:     { type: string }
+        rotulo: { type: string, description: Texto exibido. Vem da API — o front não traduz }
+        limiarConfianca:
+          type: number
+          nullable: true
+          description: Sobrepõe o padrão. Um RG extrai melhor que um contracheque amassado
+        padraoDeNome:
+          type: string
+          nullable: true
+          description: 'Modelo com as chaves dos campos, ex.: {tipo}_{nome}_{numero}'
+        campos:
+          type: array
+          items: { $ref: '#/components/schemas/DescritorDeCampo' }
+
+    DescritorDeCampo:
+      type: object
+      required: [chave, rotulo, tipoDeDado, obrigatorio, ordem]
+      properties:
+        chave:       { type: string }
+        rotulo:      { type: string }
+        tipoDeDado:  { $ref: '#/components/schemas/TipoDeDado' }
+        obrigatorio: { type: boolean }
+        mascara:     { type: string, nullable: true }
+        ordem:       { type: integer }
+        sensivel:
+          type: boolean
+          default: false
+          description: Se verdadeiro, mascarado na listagem (fato d)
+        opcoes:
+          type: array
+          items: { type: string }
+          description: Apenas para SELECAO
+
+    Reserva:
+      type: object
+      nullable: true
+      required: [usuarioId, expiraEm]
+      properties:
+        usuarioId:   { type: string }
+        usuarioNome: { type: string, nullable: true, description: Nulo quando o host não envia identidade }
+        expiraEm:    { type: string, format: date-time }
+
+    Procedencia:
+      type: object
+      required: [modelo, versaoPrompt]
+      properties:
+        modelo:       { type: string, example: fornecedor-vision-2.1 }
+        versaoPrompt: { type: string, example: rg-v4 }
+        processadoEm: { type: string, format: date-time }
+
+    RespostaEnvio:
+      type: object
+      required: [documento, duplicado]
+      properties:
+        documento: { $ref: '#/components/schemas/Documento' }
+        duplicado:
+          type: boolean
+          description: |
+            Verdadeiro quando o contentHash já existia. Nenhum processamento
+            novo foi disparado, e portanto nenhum custo foi gerado.
+
+    StatusResumido:
+      type: object
+      required: [id, estado, versao]
+      properties:
+        id:        { type: string }
+        estado:    { $ref: '#/components/schemas/EstadoDocumento' }
+        versao:    { type: integer }
+        confianca: { type: number, nullable: true }
+
+    PaginaDeDocumentos:
+      type: object
+      required: [itens]
+      properties:
+        itens:
+          type: array
+          items: { $ref: '#/components/schemas/Documento' }
+        proximoCursor:
+          type: string
+          nullable: true
+          description: Cursor, não offset — a fila muda enquanto é paginada
+
+    Problema:
+      type: object
+      description: RFC 9457
+      required: [type, title, status]
+      properties:
+        type:     { type: string, format: uri }
+        title:    { type: string }
+        status:   { type: integer }
+        detail:   { type: string }
+        instance: { type: string }
+
+    ProblemaDeConflito:
+      allOf:
+        - $ref: '#/components/schemas/Problema'
+        - type: object
+          properties:
+            documentoAtual: { $ref: '#/components/schemas/Documento' }
+            alteradoPor:    { type: string, nullable: true }
+          description: |
+            O corpo do 409 traz o estado atual para que a interface mostre o
+            que mudou e quem mudou. A decisão é da pessoa, nunca do cliente.
