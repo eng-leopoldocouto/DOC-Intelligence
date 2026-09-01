@@ -6,10 +6,30 @@ Este diretório atende ao item **II.4** do enunciado.
 
 | Arquivo | Conteúdo |
 |---|---|
-| `prompts/` | Todos os prompts do candidato, íntegros, numerados e em ordem cronológica. Sem correção de digitação, sem reescrita posterior. |
+| `prompts/` | Os prompts do candidato, íntegros, numerados e em ordem cronológica. Sem correção de digitação, sem reescrita posterior. |
 | `registro-de-verificacao.md` | O que o agente produziu, o que foi conferido, onde errou, o que foi feito. Escrito no momento. |
 | `registro-de-tempo.md` | Relógio real por fase. |
 | `onde-o-agente-errou.md` | O parágrafo pedido pelo enunciado, em primeira pessoa, escrito a partir do registro de verificação. |
+
+## Duas ressalvas sobre este diretório
+
+**Sobre as datas.** O campo `data` no cabeçalho de cada prompt é aproximado —
+foi digitado por mim, e em alguns casos ficou minutos à frente do commit que
+gravou o arquivo. **O carimbo confiável é o do git**, não o do cabeçalho:
+
+```bash
+git log --diff-filter=A --format='%ad %h  %f' --date=format:'%d/%m %H:%M:%S' -- docs/ia/prompts/
+```
+
+Declaro isto porque a mesma falha — horário escrito para a frente — apareceu no
+registro de tempo e foi apontada por auditoria. Seria incoerente corrigi-la lá e
+deixá-la aqui sem menção.
+
+**Sobre uma lacuna.** O prompt **0010 faltou** na primeira gravação: o comando
+que o criaria foi barrado por um hook de confirmação e eu não repeti a operação,
+de modo que a sequência pulou de 0009 para 0011. A ausência foi encontrada pela
+segunda auditoria. O arquivo foi recriado com a falha declarada no próprio
+cabeçalho, em vez de silenciada.
 
 ## Ferramentas de IA usadas
 

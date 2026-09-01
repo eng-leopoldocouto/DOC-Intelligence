@@ -40,3 +40,18 @@ O que aprendi conduzindo: o agente é excelente executando uma decisão e
 péssimo percebendo que a decisão está mal enquadrada. Ele não pergunta "isto é o
 que mais vale?" — ele pergunta "como faço isto bem?". As três correções de rumo
 desta entrega foram todas minhas, e nenhuma delas era técnica.
+
+**A quarta correção não foi minha, e é a mais interessante.** Ao final, pus um
+subagente auditor para conferir a entrega contra o enunciado, em contexto frio.
+Ele encontrou três coisas que passaram por mim, sendo a pior um registro de tempo
+com horários estimados para a frente num arquivo que se apresenta como relógio
+real. Corrigi — e **reincidi no mesmo defeito dentro da própria correção**, o que
+só apareceu porque rodei o auditor uma segunda vez. Ele também achou um prompt
+faltando na sequência: o comando que o gravaria foi barrado por um hook e eu não
+repeti a operação.
+
+O padrão que fecha este parágrafo: eu instruí o auditor a *"não acreditar na
+narrativa do repositório sobre si mesmo"* — e era eu quem estava acreditando na
+minha. Um autor não consegue auditar o próprio texto contra o próprio código,
+porque lê o texto e lembra da intenção em vez de ver o que ficou. **O valor do
+subagente não foi capacidade técnica: foi não ter memória do que eu quis dizer.**

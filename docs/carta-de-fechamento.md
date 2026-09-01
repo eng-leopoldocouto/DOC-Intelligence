@@ -31,8 +31,8 @@ estiver errado.
 resolve isso.**
 
 A 1.500 documentos por dia e 8.000 no pico, os gargalos técnicos que tratei
-seguem de pé: o polling continua sendo uma requisição para N documentos, a lista
-continua virtualizada, o upload continua limitado a três simultâneos. O que
+seguem de pé: o polling continua sendo uma requisição para N documentos, a fila
+continua paginada por cursor, o upload continua limitado a três simultâneos. O que
 quebra é aritmética. Duas pessoas do atendimento, aos quatro minutos por
 documento que o enunciado cita, conferem cerca de 240 por dia. Com 8.000
 chegando entre 9h e 11h e uma fração relevante caindo na conferência por baixa
@@ -65,28 +65,45 @@ primeira coisa que eu mudaria.
 
 ## Quanto tempo isso tudo levou
 
-**Cerca de três horas de trabalho efetivo**, começando às 19h17 de 31 de agosto
-de 2026 e terminando às 00h45 do dia seguinte, com uma interrupção de duas horas
-por limite de uso da ferramenta. O tempo está carimbado por fase em
-`docs/ia/registro-de-tempo.md`.
+**3h08 de trabalho efetivo**, somando a coluna de duração de
+`docs/ia/registro-de-tempo.md`. Começou às 19h17 de 31 de agosto de 2026 e
+terminou na madrugada do dia seguinte, com uma interrupção de cerca de duas
+horas por limite de uso da ferramenta, não contabilizada.
 
-Devo uma ressalva sobre esse arquivo, porque ela é do mesmo tipo que a entrega
-inteira se propõe a não ter. Três linhas dele traziam horários **estimados para
-a frente** — o commit que as gravou é anterior ao horário que elas declaravam
-como início. Foi o agente auditor que apontou, comparando a tabela com o
-`git log`. Corrigi para os horários reais e **registrei a correção em vez de
-apagar o erro**: um documento que se apresenta como relógio real não pode conter
-estimativa disfarçada, ainda mais sendo esta a resposta que se apoia nele.
+Devo uma ressalva sobre esse arquivo, e ela é a coisa mais útil que aprendi
+nesta entrega. Três linhas dele traziam horários **estimados para a frente** — o
+commit que as gravou é anterior ao horário que elas declaravam como início. O
+agente auditor apontou, comparando a tabela com o `git log`. Corrigi. **E
+reincidi na correção**: ao consertar duas linhas, escrevi na terceira um término
+dezoito minutos à frente do commit que a gravava, dentro do parágrafo que
+acabara de explicar por que isso é inaceitável. A segunda auditoria pegou.
+
+O conserto definitivo não foi um número melhor: foi tirar do arquivo a
+possibilidade de errar. A coluna "fim" da fase em andamento passou a dizer *"ver
+último commit"* — não se data prospectivamente um campo que aponta para o
+histórico. **Registrei as duas correções em vez de apagar os erros**, porque um
+documento que se apresenta como relógio real não pode conter estimativa
+disfarçada, e porque a segunda queda diz mais sobre como eu trabalho do que a
+primeira.
 
 A distribuição diz mais que o total: **por volta de 40% do tempo foi spec, ADRs
 e registro de decisão, antes de existir uma linha de código.** A especificação
 inteira e as treze ADRs saíram em vinte e dois minutos de escrita; o plano de
 implementação, em vinte e um. Foi o melhor investimento da entrega — a fatia
 vertical foi construída sem uma única decisão de arquitetura tomada no meio do
-código, e as cinco divergências que apareceram estão registradas contra uma spec
-que ficou congelada numa tag desde antes do primeiro commit de implementação.
+código, e as **nove** divergências que apareceram estão registradas contra uma
+spec que ficou congelada numa tag desde antes do primeiro commit de
+implementação. Quatro delas só existem porque um subagente auditor, rodando em
+contexto frio, encontrou o que eu não tinha encontrado no meu próprio texto.
 
 Trabalhei com o Claude Opus 5 em sessão interativa. O prazo foi comprimido de
 três dias para menos de um por decisão minha, o que tornou o recorte mais
 importante que a execução — e é por isso que a maior parte do que entrego é
 texto, e não código.
+
+Se houver uma única coisa a levar desta entrega sobre trabalhar com agentes, é
+esta: **o autor não consegue auditar o próprio texto contra o próprio código**,
+porque lê o texto e lembra da intenção em vez de ver o que ficou. O valor do
+subagente auditor não foi capacidade técnica — foi não ter memória do que eu quis
+dizer. Rodei-o duas vezes; na segunda ele encontrou erros que a primeira rodada
+de correções tinha introduzido.

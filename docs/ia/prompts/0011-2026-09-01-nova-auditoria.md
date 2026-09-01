@@ -1,6 +1,6 @@
 ---
 ordem: 11
-data: 2026-09-01 ~00:55 -03:00
+data: 2026-09-01, madrugada (carimbo exato: `git log -- <este arquivo>`)
 canal: Claude Code (Opus 5) — sessão interativa
 autor: candidato
 nota: transcrito na íntegra, exatamente como foi escrito. Não houve reescrita posterior.

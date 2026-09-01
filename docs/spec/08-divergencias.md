@@ -106,9 +106,12 @@ histórico, e não um esquecimento que ninguém notou.
 
 ## D-06 — Lista virtualizada: afirmada na spec, **não implementada**
 
-**A spec dizia** (`05-fatos-do-ambiente.md`, fato (e)): *"Lista virtualizada e
-paginação por cursor. O DOM não cresce com a fila"*, apontando o caminho
-`features/review/ListaVirtualizada.tsx`.
+**A spec dizia**, em **três lugares**:
+- `05-fatos-do-ambiente.md` (fato e): *"Lista virtualizada e paginação por
+  cursor. O DOM não cresce com a fila"*, apontando `features/review/ListaVirtualizada.tsx`
+- `04-arquitetura.md`: a mesma promessa no fluxo da conferência
+- `07-nao-feito.md`: trata a lista virtualizada como **já existente e
+  reaproveitável** para a futura tela de busca
 
 **O que foi feito:** só a metade. A **paginação por cursor existe**
 (`useFilaDeConferencia`, `useInfiniteQuery`, 50 por página) e é ela que evita
