@@ -20,12 +20,59 @@ Fuso: -03:00 (Mossoró/RN). Data de referência: 31/08/2026.
 | Fase 5b — conferência (T9-T13) | 21:12 | 21:41 | 0h29 | 64 testes; T-01 e T-03 verificados no navegador |
 | Fase 6 — README e agente auditor (T14, T16) | 21:41 | 21:48 | 0h07 | README com roteiro; auditor autorado |
 | Fase 7 — carta de fechamento (T15) | 21:48 | 21:55 | 0h07 | 724 palavras, PDF em 2 páginas, Roboto 11 |
-| Fase 8 — auditoria e correções | 21:55 | ver último commit | ~0h50* | *duas rodadas de auditoria e as correções; exclui 2h de interrupção por limite de sessão |
+| Fase 8 — auditoria e correções | 21:55 | ver último commit | ~0h50* | *três rodadas de auditoria e as correções; exclui 2h de interrupção por limite de sessão. **É a linha menos confiável deste arquivo** — ver a ressalva abaixo* |
 
-**Total: 3h20**, somando a coluna de duração. Início às 19h17 de 31/08/2026;
-término na madrugada de 01/09/2026 — o horário exato é o do último commit, e
-não um número escrito aqui. Houve uma interrupção de cerca de duas horas por
-limite de uso da sessão, **não** contabilizada acima.
+**Subtotal da primeira sessão: 3h20**, somando a coluna. Início às 19h17 de
+31/08/2026. Houve uma interrupção de cerca de duas horas por limite de uso da
+sessão, **não** contabilizada.
+
+**Ressalva sobre a fase 8, apontada pela quarta auditoria.** Ela declara ~0h50 e
+abrange commits que vão de 21:55 até **06:03** do dia seguinte. Entre eles há
+intervalos ociosos que eu não registrei no momento e **não consigo reconstruir
+sem inventar** — então a linha fica como está, com esta ressalva, em vez de
+ganhar um número mais bonito. O que ela mede com certeza é trabalho; o que ela
+não mede é quanto tempo passou entre um commit e o seguinte.
+
+---
+
+## Segunda sessão — 01/09/2026, manhã · auditoria externa
+
+Uma auditoria **externa a este repositório** devolveu uma lista em quatro blocos.
+O prompt está íntegro em `prompts/0014-2026-09-01-auditoria-externa-defeitos.md`.
+Desta vez cada fase tem o commit que a fecha, e a coluna "carimbo" é conferível
+com `git log`.
+
+| Fase | Início | Fim | Duração | Carimbo | Observação |
+|---|---|---|---|---|---|
+| 4a — leitura e registro do prompt | 09:13 | 09:16 | 0h03 | `c37136c` | o prompt vai íntegro **antes** de qualquer alteração (regra 6) |
+| 4b — Blocos 1 e 2: defeitos e fatos do ambiente | 09:16 | 09:39 | 0h23 | `4f88de3` | fronteira de erro, diálogo acessível, `aria-live`, 360 px, segundo portão, pressão da fila; ADR-014 e ADR-015; +17 testes |
+| 4c — Bloco 3: artefatos | 09:39 | 10:48 | 1h09 | `78058bf` | CI, hook `PreToolUse`, oxlint, duas capturas, `exemplos.http` |
+| 4d — Bloco 4: auditoria, achados e fechamento | 10:48 | **ver último commit** | **≥0h35** | — | quarta auditoria em contexto frio, dez achados, correções, gerador do PDF |
+
+**Total: 3h20 + 1h35 fechadas nesta sessão + a fase 4d = ≥5h30.**
+
+### Por que "≥", e não um número redondo
+
+Porque este arquivo já errou três vezes o mesmo defeito, e as três foram o mesmo
+gesto: **escrever um número que ainda não aconteceu.** A fase em andamento não
+tem fim conhecido no instante em que a linha é escrita — tem apenas um piso, que
+é o intervalo até o commit anterior.
+
+`≥` é verdade em qualquer momento posterior; um número exato só seria verdade se
+eu acertasse o futuro. É a mesma correção estrutural da segunda rodada: tirar do
+arquivo a **possibilidade** de errar, em vez de acertar o número desta vez.
+
+### O que faltava aqui, e como foi descoberto
+
+Até a quarta auditoria este arquivo **parava na madrugada de 01/09** e declarava
+"Total: 3h20" — enquanto o `git log` já mostrava sete commits da manhã seguinte,
+`+1590` linhas só num deles, duas ADRs novas, CI, hook, linter, e a suíte indo de
+64 para 96 testes. A soma da coluna estava certa. **O que faltava era coluna.**
+
+É a quarta ocorrência do mesmo defeito no mesmo arquivo, e a primeira em que o
+erro não é o número escrito e sim **o número que faltou escrever**. O padrão que
+eu mesmo nomeei se aplicou com precisão: a carta foi reescrita e o arquivo que
+ela manda conferir não foi tocado — o vizinho, mais uma vez.
 
 ## Correção de 01/09/2026
 

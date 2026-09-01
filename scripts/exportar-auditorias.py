@@ -61,6 +61,13 @@ AUDITORIAS = [
      "Segunda auditoria — 86/100, seis achados novos",
      "As ressalvas anteriores caíram, mas quatro dos seis achados novos foram "
      "INTRODUZIDOS pela própria rodada de correção."),
+    ("a6e307fd6c4bed077", "4-quarta-auditoria",
+     "Quarta auditoria — 89,5/100, dez achados e o conserto estrutural",
+     "Rodou depois de uma auditoria EXTERNA ao repositório. Confirmou por comando que "
+     "as guardas seguram (hook, gen:api, linter, contrato), e ainda assim achou dez "
+     "divergências texto x código — entre elas a quarta ocorrência do mesmo defeito no "
+     "registro de tempo, desta vez pelo número que faltou escrever. Recomendou o passo "
+     "de CI que compara as contagens do README com a realidade."),
     ("a850b3732dbf9b99b", "3-terceira-auditoria",
      "Terceira auditoria — 85/100, o padrão nomeado",
      "Encontrou oito achados e nomeou o padrão que as duas anteriores não viram: "

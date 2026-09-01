@@ -309,3 +309,41 @@ decorativas.
 final da rodada, e não no momento de cada fato. A diferença para a anterior é
 que agora existe registro intermediário — os commits `c37136c`, `4f88de3` e
 `78058bf` carimbam cada bloco, e as saídas coladas acima são as reais.
+
+### O que a quarta auditoria acrescentou, e por que ela vale mais que as três
+
+Veredito **APROVADO COM RESSALVAS, 89,5/100**, com dez achados. Ela confirmou por
+comando que as guardas seguram — hook bloqueando nos seis casos, `gen:api` com
+diff vazio, contrato devolvendo 409 no `If-Match` velho, `spec-v1` 28 minutos
+antes do primeiro arquivo em `src/` — e mesmo assim achou dez lugares em que o
+texto não correspondia ao código. Cinco eu corrigi nesta rodada; três ela mesma
+viu serem corrigidos enquanto auditava; um segue aberto (A-06) e um é o registro
+de tempo (A-01), que era o mais grave.
+
+**A-01 merece nota.** O registro de tempo parava na madrugada e declarava 3h20,
+enquanto o `git log` mostrava sete commits da manhã seguinte. A soma da coluna
+estava certa; **o que faltava era coluna.** É a quarta ocorrência do mesmo
+defeito no mesmo arquivo, e a primeira em que o erro é o número que faltou
+escrever. O padrão que eu mesmo nomeei se aplicou com precisão: a carta foi
+reescrita e o arquivo que ela manda conferir não foi tocado.
+
+**O achado que mudou a ferramenta, e não só o texto.** Em vez de listar a quinta
+ocorrência do mesmo defeito, o auditor apontou a causa — *o número mora em dois
+lugares, e a resposta até aqui era disciplina* — e recomendou um passo de CI
+comparando o README com a realidade. Implementei: `scripts/conferir-contagens.mjs`.
+
+Ele **encontrou um erro meu no minuto em que passou a existir**: eu tinha
+acabado de escrever "190 comandos de auditoria" a partir de um `grep -c`, e o
+número certo é 187 — o `grep` contava também os blocos citados dentro do prompt,
+que não são comandos que alguém rodou. Um erro cometido dentro do commit que
+existia para impedir esse tipo de erro, pego pela própria ferramenta do commit.
+
+Verificado que ele morde: dois números trocados de propósito no README →
+saída 1, com a lista do que não bate; restaurados → saída 0.
+
+**A-06 fica aberto, e por escolha declarada.** `onde-o-agente-errou.md` é o
+parágrafo em primeira pessoa que o item II.4 pede, e a seção 7 do `CLAUDE.md`
+diz que **o agente não escreve conteúdo em primeira pessoa do candidato**. Ele
+não incorpora os quatro erros desta rodada — inclusive o mais instrutivo, o
+achado inventado. O material está aqui em V-008, com arquivo e comando; o
+parágrafo é meu para escrever.

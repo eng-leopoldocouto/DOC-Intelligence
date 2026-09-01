@@ -119,3 +119,19 @@ echo '{"tool_name":"Write","tool_input":{"file_path":"src/features/x.tsx","conte
 
 Se ele disparou durante o desenvolvimento, e o que aconteceu, está no
 [`registro-de-verificacao.md`](registro-de-verificacao.md).
+
+## O verificador de contagens: a auditoria virando ferramenta
+
+Quatro rodadas do subagente auditor acharam a **mesma classe de defeito quatro
+vezes** — um número escrito num documento e desmentido pelo repositório. Na
+quarta, ele parou de apontar ocorrências e apontou a causa: o número mora em dois
+lugares, e a resposta até ali era disciplina.
+
+`npm run contagens` é a implementação da recomendação dele. Compara o README com
+a realidade — testes (rodando a suíte), ADRs, prompts, divergências, testes de
+arquitetura, comandos de auditoria exportados — e falha com a lista do que não
+bate. Está na CI, ao lado do passo que regenera os tipos do contrato.
+
+Vale registrar como isso fecha o ciclo do item II.4: **um agente encontrou um
+padrão nos próprios erros de outro agente e do autor, e o padrão virou um passo
+de verificação que nenhum dos dois pode esquecer de rodar.**

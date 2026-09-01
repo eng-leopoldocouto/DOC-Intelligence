@@ -47,5 +47,12 @@ jobs:
             exit 1
           fi
 
+      # Quatro rodadas de auditoria acharam a MESMA classe de defeito quatro
+      # vezes: um numero escrito no README e desmentido pelo repositorio. A
+      # resposta ate aqui era disciplina; disciplina falhou quatro vezes
+      # seguidas. Este passo tira o erro do alcance da boa memoria.
+      - name: As contagens do README batem com a realidade
+        run: npm run contagens
+
       - name: O projeto compila
         run: npm run build

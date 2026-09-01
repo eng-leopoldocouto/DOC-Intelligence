@@ -112,7 +112,7 @@ porque não prometem: **afirmam verificação**.
 
 | Onde | O que diz |
 |---|---|
-| `05-fatos-do-ambiente.md:204` | *"Lista virtualizada e paginação por cursor. O DOM não cresce com a fila"*, apontando `features/review/ListaVirtualizada.tsx` |
+| `05-fatos-do-ambiente.md:252` | *"Lista virtualizada e paginação por cursor. O DOM não cresce com a fila"*, apontando `features/review/ListaVirtualizada.tsx` — **a afirmação foi riscada no lugar em 01/09**, depois que a quarta auditoria mostrou que ela seguia de pé |
 | `04-arquitetura.md:119` | a mesma promessa no fluxo da conferência |
 | `07-nao-feito.md:36` | trata a lista virtualizada como **já existente e reaproveitável** para a futura tela de busca |
 | `06-plano-de-testes.md:94` | **"Verificado à mão com fixture"** — afirma uma verificação que não ocorreu |
@@ -238,6 +238,20 @@ diff não vem vazio e a CI cai. **A regra 1 deixou de depender de disciplina.**
 E a guarda G1 finalmente "falha o build" no sentido em que a ADR-008 prometia —
 `npm test` inclui `tests/arquitetura/fronteiras.test.ts`, e `npm test` agora é
 um passo obrigatório de CI.
+
+**Um quinto passo, que não estava previsto e é o mais útil.** A quarta auditoria
+observou que quatro rodadas encontraram a **mesma classe de defeito quatro
+vezes**: um número escrito num documento e desmentido pelo repositório. A
+resposta das três primeiras foi disciplina — *procurar pelo número, não pelo
+assunto* —, e disciplina falhou quatro vezes seguidas.
+
+`npm run contagens` (`scripts/conferir-contagens.mjs`) compara o que o README
+afirma com o que o repositório tem: total de testes (rodando a suíte), ADRs,
+prompts, divergências, testes de arquitetura, comandos de auditoria exportados, e
+o índice das ADRs contra os arquivos. **Ele encontrou um erro meu no minuto em
+que passou a existir** — eu tinha escrito "190 comandos" e são 187.
+
+O conserto durável não era acertar o número desta vez.
 
 ---
 

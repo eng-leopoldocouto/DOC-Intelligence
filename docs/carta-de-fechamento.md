@@ -83,10 +83,20 @@ passou a ter uma tela dedicada a informar a perda.
 
 ## Quanto tempo isso tudo levou
 
-**3h20 de trabalho efetivo**, somando a coluna de duração de
-`docs/ia/registro-de-tempo.md`. Começou às 19h17 de 31 de agosto de 2026 e
-terminou na madrugada do dia seguinte, com uma interrupção de cerca de duas
-horas por limite de uso da ferramenta, não contabilizada.
+**Pelo menos 5h30 de trabalho efetivo**, somando a coluna de duração de
+`docs/ia/registro-de-tempo.md`: 3h20 na noite de 31 de agosto, mais 1h35 já
+fechadas na manhã seguinte, mais a fase de fechamento em curso. Houve uma
+interrupção de cerca de duas horas por limite de uso da ferramenta, não
+contabilizada.
+
+O "pelo menos" não é modéstia — é a correção de um erro que este arquivo cometeu
+quatro vezes. Nas três primeiras eu escrevi números que ainda não tinham
+acontecido. Na quarta, apontada pela última auditoria, o erro foi o oposto e
+mais difícil de ver: **o registro parava na madrugada** e declarava 3h20,
+enquanto o `git log` já mostrava sete commits da manhã seguinte, duas ADRs
+novas, CI, hook, linter e a suíte indo de 64 para 96 testes. A soma da coluna
+estava certa; o que faltava era coluna. `≥` é verdade em qualquer instante
+posterior; um número exato só seria verdade se eu acertasse o futuro.
 
 Devo uma ressalva sobre esse arquivo, e ela é a coisa mais útil que aprendi
 nesta entrega. Ele trazia horários **estimados para a frente** — o commit que os

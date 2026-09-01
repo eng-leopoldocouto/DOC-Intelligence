@@ -12,6 +12,7 @@
     "test:watch": "vitest",
     "typecheck": "tsc --noEmit",
     "lint": "oxlint --deny-warnings",
+    "contagens": "node scripts/conferir-contagens.mjs",
     "gen:api": "openapi-typescript docs/spec/openapi.yaml -o src/shared/api/types.gen.ts",
     "mock": "tsx src/mocks/servidor.ts",
     "fixtures": "python scripts/gerar-documentos-ficticios.py",

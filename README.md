@@ -123,6 +123,7 @@ os dois modos de falha do fato (a) apareçam sem depender de sorte.
 | `npm test` | 96 testes, incluindo as guardas de arquitetura |
 | `npm run typecheck` | TypeScript estrito |
 | `npm run lint` | oxlint, zero avisos ([D-08](docs/spec/08-divergencias.md), fechada) |
+| `npm run contagens` | Confere se os números deste README são desmentidos pelo repositório |
 | `npm run build` | Build de produção |
 | `npm run mock` | Serve o contrato em `http://localhost:8787/api/v1` |
 | `npm run gen:api` | Regenera os tipos a partir de `docs/spec/openapi.yaml` |
@@ -209,7 +210,7 @@ gere um segundo documento, e que rejeitar não dispare reprocessamento — este
 último contando as chamadas que *não* foram feitas, porque efeito colateral
 ausente não se prova de outro jeito. Um teste renderiza um tipo de documento que
 o front-end nunca viu, e é ele que sustenta a promessa central da arquitetura: se
-falhar, a especificação inteira é conversa fiada. E cinco testes de arquitetura
+falhar, a especificação inteira é conversa fiada. E sete testes de arquitetura
 verificam por máquina as regras que, escritas apenas no `CLAUDE.md`, seriam
 sugestões. Deixei de fora deliberadamente aparência e decodificação de imagem com
 EXIF: em jsdom eles passariam sem provar nada, e teste que passa sem provar nada
@@ -224,7 +225,7 @@ Trabalhei com **Claude Opus 5** em sessão interativa. O registro completo está
 
 | Arquivo | O que é |
 |---|---|
-| [`prompts/`](docs/ia/prompts/) | Os 12 prompts, íntegros e em ordem. **Erros de digitação preservados** — o enunciado pede "como foram escritos" |
+| [`prompts/`](docs/ia/prompts/) | Os 14 prompts, íntegros e em ordem. **Erros de digitação preservados** — o enunciado pede "como foram escritos" |
 | [`registro-de-verificacao.md`](docs/ia/registro-de-verificacao.md) | Sete entradas: o que o agente produziu, o que conferi, onde errou, o que fiz |
 | [`onde-o-agente-errou.md`](docs/ia/onde-o-agente-errou.md) | O parágrafo em primeira pessoa exigido pelo enunciado |
 | [`registro-de-tempo.md`](docs/ia/registro-de-tempo.md) | Relógio real por fase, **com três correções registradas em vez de apagadas** |
@@ -248,8 +249,13 @@ aritmético dele, ou no outro documento que o cita.** A quarta rodou depois de u
 auditoria externa ao repositório, cujo prompt está íntegro em
 [`prompts/0014`](docs/ia/prompts/0014-2026-09-01-auditoria-externa-defeitos.md).
 
-As **transcrições das quatro rodadas** estão em
-[`docs/ia/transcricao/auditorias/`](docs/ia/transcricao/auditorias/), com os 110
+Na quarta rodada o auditor parou de apontar ocorrências e apontou a **causa**: o
+número mora em dois lugares, e a resposta até ali era disciplina. `npm run
+contagens` é a implementação da recomendação dele, e está na CI — o padrão que
+quatro auditorias encontraram deixou de depender de alguém lembrar.
+
+As transcrições das **quatro auditorias e da tentativa interrompida** estão em
+[`docs/ia/transcricao/auditorias/`](docs/ia/transcricao/auditorias/), com os 187
 comandos que o auditor rodou **na íntegra** — é neles que se vê a verificação
 acontecendo, e não apenas a conclusão dela. A história em prosa está em
 [`V-007` e `V-008`](docs/ia/registro-de-verificacao.md), e a conclusão é a única
