@@ -29,3 +29,5 @@ pessoal com aparência de engenharia.
 | [011](011-identidade-delegada-ao-host.md) | Identidade delegada ao host interno | (g), P1 |
 | [012](012-rejeicao-pelo-conferente.md) | Rejeição do documento pelo conferente | (b), P3 |
 | [013](013-nome-padronizado-como-campo.md) | Nome padronizado é campo conferível | P4 |
+| [014](014-enviar-e-movel-conferir-e-desktop.md) | Enviar é móvel; conferir é desktop | (b) |
+| [015](015-segundo-sinal-de-confianca.md) | Segundo portão de confiança, independente do modelo | (a), (f) |

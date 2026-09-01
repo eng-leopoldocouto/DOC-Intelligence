@@ -8,7 +8,7 @@ Repositório: <https://github.com/eng-leopoldocouto/DOC-Intelligence>
 
 ## O que ficou de fora, e por quê
 
-A busca do que já foi processado — o quinto comportamento do produto — está
+A busca do que já foi processado — parte do terceiro comportamento do produto — está
 projetada, servida pelo mock e **sem tela**. A fatia que o enunciado nomeia vai
 "do envio até a correção de um campo"; busca é uma segunda fatia, não a
 continuação desta, e construí-la pela metade produziria exatamente o que o

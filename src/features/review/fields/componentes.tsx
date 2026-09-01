@@ -12,24 +12,35 @@ import { formatarDocumento, mascararDocumento } from '@/shared/lib/mascara'
 import type { PropsDeCampo } from './tipos'
 
 function Envolucro({
-  descritor, abaixoDoLimiar, campo, children,
+  descritor, motivo, campo, children,
 }: PropsDeCampo & { children: React.ReactNode }) {
   return (
-    <div className={`campo ${abaixoDoLimiar ? 'duvidoso' : ''}`}>
+    <div className={`campo ${motivo ? 'duvidoso' : ''} ${motivo === 'FORMATO_INVALIDO' ? 'invalido' : ''}`}>
       <label htmlFor={`campo-${descritor.chave}`}>
         {descritor.rotulo}
         {descritor.obrigatorio && <span aria-hidden="true" className="obrigatorio"> *</span>}
       </label>
       {children}
-      {/* Confiança POR CAMPO: um documento a 90% no geral pode ter um campo a
-          30%, e é esse campo que precisa do olho humano. */}
-      {abaixoDoLimiar && (
+
+      {/* O aviso diz POR QUÊ o campo está destacado. Dois portões independentes
+          produzem dois motivos, e a ação da pessoa é diferente em cada um: no
+          primeiro ela compara com a imagem; no segundo ela sabe que há um erro,
+          mesmo que a imagem pareça concordar (ADR-015). */}
+      {motivo === 'CONFIANCA_BAIXA' && (
         <span className="aviso-campo">
           Confiança baixa
           {campo?.confianca != null && ` (${Math.round(campo.confianca * 100)}%)`}
           {' '}— confira contra o documento
         </span>
       )}
+      {motivo === 'FORMATO_INVALIDO' && (
+        <span className="aviso-invalido">
+          O modelo confia
+          {campo?.confianca != null && ` (${Math.round(campo.confianca * 100)}%)`}
+          , o formato não fecha — confira dígito por dígito
+        </span>
+      )}
+
       {campo?.origem === 'HUMANO' && <span className="aviso-humano">corrigido por pessoa</span>}
     </div>
   )
@@ -37,7 +48,10 @@ function Envolucro({
 
 const atributosComuns = (p: PropsDeCampo) => ({
   id: `campo-${p.descritor.chave}`,
-  'aria-invalid': p.abaixoDoLimiar,
+  // `aria-invalid` só quando o formato realmente não fecha. Marcar confiança
+  // baixa como inválida diria ao leitor de tela que o valor está errado, quando
+  // o que sabemos é que o modelo não teve certeza — são coisas diferentes.
+  'aria-invalid': p.motivo === 'FORMATO_INVALIDO',
   required: p.descritor.obrigatorio,
   onChange: (e: { target: { value: string } }) => p.onChange(e.target.value),
 })

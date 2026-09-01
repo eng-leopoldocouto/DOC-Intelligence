@@ -5,7 +5,7 @@
  * mudança de prompt viraria um ciclo de desenvolvimento — para um sistema cuja
  * premissa declarada é mudar de prompt várias vezes por ano (fato f).
  */
-import { campoAbaixoDoLimiar } from '@/entities/documento/estado'
+import { motivoDeConferencia } from '@/entities/documento/validacao-de-campo'
 import type { CampoExtraido } from '@/entities/documento/tipos'
 import type { TipoDocumento } from '@/entities/tipo-documento/tipos'
 import { resolverComponente } from './fields/registry'
@@ -35,7 +35,13 @@ export function PainelDeCampos({
               descritor={descritor}
               campo={campo}
               valor={valores[descritor.chave] ?? ''}
-              abaixoDoLimiar={campo ? campoAbaixoDoLimiar(campo, limiar) : descritor.obrigatorio}
+              motivo={
+                campo
+                  ? motivoDeConferencia(campo, descritor.tipoDeDado, limiar)
+                  : descritor.obrigatorio
+                    ? 'CONFIANCA_BAIXA'
+                    : null
+              }
               onChange={(v) => onChange(descritor.chave, v)}
             />
           )

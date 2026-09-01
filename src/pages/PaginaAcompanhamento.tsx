@@ -7,6 +7,7 @@ import { emProcessamento, falhou } from '@/entities/documento/estado'
 import type { Documento, EstadoDocumento } from '@/entities/documento/tipos'
 import { formatarDataHora, formatarTempoDecorrido } from '@/shared/lib/formato'
 import { usePollingLote } from '@/features/processing/usePollingLote'
+import { useAnuncioDeTransicoes } from '@/features/processing/useAnuncioDeTransicoes'
 
 const ETIQUETA: Record<EstadoDocumento, { texto: string; classe: string }> = {
   RECEBIDO: { texto: 'Recebido', classe: 'neutra' },
@@ -37,10 +38,10 @@ function Reprocessar({ documento }: { documento: Documento }) {
   }
 
   return (
-    <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
+    <div className="confirmacao-custo">
       {/* Fato (a): cada reprocessamento é uma nova chamada COBRADA.
           A pessoa precisa saber disso antes de decidir — e a decisão é dela. */}
-      <span style={{ fontSize: 12, color: 'var(--alerta)' }}>
+      <span className="confirmacao-custo-texto">
         Isso gera uma nova chamada cobrada ao modelo. Confirmar?
       </span>
       <button
@@ -72,6 +73,14 @@ export function PaginaAcompanhamento() {
 
   const agora = new Date()
 
+  // O estado efetivo é o da consulta em lote quando existe, e o da listagem
+  // quando não. Este mapa é a entrada do anúncio e a fonte da etiqueta —
+  // calculá-lo duas vezes deixaria os dois divergirem.
+  const estadoPorId: Record<string, EstadoDocumento> = Object.fromEntries(
+    documentos.map((d) => [d.id, porId[d.id]?.estado ?? d.estado]),
+  )
+  const anuncio = useAnuncioDeTransicoes(estadoPorId, (e) => ETIQUETA[e].texto)
+
   return (
     <>
       <h1>Acompanhamento</h1>
@@ -81,6 +90,14 @@ export function PaginaAcompanhamento() {
         {pausado && ' Consulta pausada enquanto a aba está em segundo plano.'}
       </p>
 
+      {/* O estado muda sozinho por consulta em lote. Sem esta região, quem usa
+          leitor de tela não fica sabendo — as etiquetas trocam em silêncio.
+          O texto é AGREGADO de propósito: o nome padronizado contém o nome da
+          pessoa, e anúncio é saída de dado como qualquer outra (regra 4). */}
+      <p className="anuncio-vivo" role="status" aria-live="polite" aria-atomic="true">
+        {anuncio}
+      </p>
+
       {documentos.length === 0 ? (
         <div className="cartao vazio">
           Nenhum documento ainda. <Link to="/">Envie os primeiros</Link>.
@@ -88,7 +105,7 @@ export function PaginaAcompanhamento() {
       ) : (
         <ul className="lista-itens">
           {documentos.map((doc) => {
-            const estado = porId[doc.id]?.estado ?? doc.estado
+            const estado = estadoPorId[doc.id] ?? doc.estado
             const etiqueta = ETIQUETA[estado]
             return (
               <li key={doc.id} className="item">
@@ -105,7 +122,7 @@ export function PaginaAcompanhamento() {
                   </div>
                   {doc.motivoFalha && <div className="resolucao">{doc.motivoFalha}</div>}
                 </div>
-                <div style={{ display: 'flex', gap: 10, alignItems: 'center' }}>
+                <div className="acoes-item">
                   {falhou(estado) && <Reprocessar documento={doc} />}
                   {(estado === 'AGUARDANDO_CONFERENCIA' || estado === 'EM_CONFERENCIA') && (
                     <Link className="botao" to={`/conferencia/${doc.id}`}>Conferir</Link>

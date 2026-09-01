@@ -4,6 +4,7 @@
  * Três saídas, nenhuma automática. O cliente não sabe qual das duas versões
  * está certa — quem sabe é a pessoa que tem o documento na tela.
  */
+import { Dialogo } from '@/shared/ui/Dialogo'
 import type { CampoExtraido } from '@/entities/documento/tipos'
 import type { TipoDocumento } from '@/entities/tipo-documento/tipos'
 import type { Conflito } from './useGravarCampos'
@@ -29,18 +30,31 @@ export function ConflitoDialog({
   )
 
   return (
-    <div className="dialogo-fundo" role="dialog" aria-modal="true" aria-labelledby="titulo-conflito">
-      <div className="dialogo">
-        <h2 id="titulo-conflito">
-          {conflito.alteradoPor ?? 'Outra pessoa'} alterou este documento enquanto você editava
-        </h2>
-        <p className="subtitulo">
-          Sua edição não foi perdida e nada foi sobrescrito. Escolha o que fazer.
-        </p>
+    <Dialogo
+      aoFechar={onCancelar}
+      titulo={`${conflito.alteradoPor ?? 'Outra pessoa'} alterou este documento enquanto você editava`}
+      acoes={
+        <>
+          <button type="button" className="botao" onClick={onCancelar}>
+            Continuar editando
+          </button>
+          <button type="button" className="botao" onClick={onRecarregar}>
+            Descartar a minha e usar a versão salva
+          </button>
+          <button type="button" className="botao primario" onClick={onSobrescrever}>
+            Manter a minha e sobrescrever
+          </button>
+        </>
+      }
+    >
+      <p className="subtitulo">
+        Sua edição não foi perdida e nada foi sobrescrito. Escolha o que fazer.
+      </p>
 
-        {divergentes.length === 0 ? (
-          <p className="subtitulo">Nenhum campo em que vocês discordem — só a versão avançou.</p>
-        ) : (
+      {divergentes.length === 0 ? (
+        <p className="subtitulo">Nenhum campo em que vocês discordem — só a versão avançou.</p>
+      ) : (
+        <div className="rolagem-tabela">
           <table className="tabela-conflito">
             <thead>
               <tr>
@@ -59,20 +73,8 @@ export function ConflitoDialog({
               ))}
             </tbody>
           </table>
-        )}
-
-        <div className="dialogo-acoes">
-          <button type="button" className="botao" onClick={onCancelar}>
-            Continuar editando
-          </button>
-          <button type="button" className="botao" onClick={onRecarregar}>
-            Descartar a minha e usar a versão salva
-          </button>
-          <button type="button" className="botao primario" onClick={onSobrescrever}>
-            Manter a minha e sobrescrever
-          </button>
         </div>
-      </div>
-    </div>
+      )}
+    </Dialogo>
   )
 }

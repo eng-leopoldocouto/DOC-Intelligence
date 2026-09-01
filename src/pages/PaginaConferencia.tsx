@@ -95,6 +95,15 @@ export function PaginaConferencia() {
 
   return (
     <>
+      {/* Aparece só abaixo de 760 px. A conferência é decisão declarada de
+          desktop (ADR-014): o documento ao lado dos campos é a razão de ser da
+          tela. Avisar é mais honesto do que empilhar em silêncio. */}
+      <p className="aviso-desktop">
+        Esta tela foi feita para o computador — o documento precisa ficar ao lado
+        dos campos. Num aparelho pequeno ela funciona empilhada, mas conferir
+        assim é mais lento e mais sujeito a erro.
+      </p>
+
       <div className="cabecalho-conferencia">
         <div>
           <h1>Conferência</h1>
@@ -105,7 +114,7 @@ export function PaginaConferencia() {
             {doc.procedencia && ` · ${doc.procedencia.modelo} / ${doc.procedencia.versaoPrompt}`}
           </p>
         </div>
-        <div style={{ display: 'flex', gap: 8 }}>
+        <div className="acoes-conferencia">
           <Link className="botao" to="/conferencia">Voltar</Link>
           <button type="button" className="botao perigo" onClick={() => setRejeitando(true)}>
             Rejeitar

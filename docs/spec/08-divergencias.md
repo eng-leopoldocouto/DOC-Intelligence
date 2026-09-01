@@ -96,8 +96,9 @@ que quebra em silêncio — não mudou.
 
 **A spec dizia** (`07-nao-feito.md`): busca e listagem projetadas, sem tela.
 
-**O que foi feito:** exatamente isso. `GET /documentos` com filtro e cursor está
-no contrato e é servido pelo mock; **não há rota nem tela**.
+**O que foi feito:** não há rota nem tela. A **listagem por estado** existe no
+contrato e é servida pelo mock; a **busca por termo, não** — ver [D-10](#d-10--o-texto-afirmava-busca-especificada-o-contrato-nao-tem-parametro-de-termo),
+que corrige o exagero desta própria entrada.
 
 **Registrado aqui** apenas para que a ausência seja uma decisão visível no
 histórico, e não um esquecimento que ninguém notou.
@@ -201,3 +202,80 @@ fora do prazo desta entrega.
 **Registro esta divergência** porque ela é da mesma classe das D-06 e D-07:
 afirmação de texto sem lastro no que está montado. Tendo corrigido aquelas
 depois da auditoria, deixar esta de pé seria incoerente.
+
+---
+
+## D-10 — O texto afirmava busca "especificada"; o contrato não tem parâmetro de termo
+
+**O texto dizia**, em três lugares:
+
+| Onde | O que dizia |
+|---|---|
+| `README.md` (limitações) | *"Sem busca. **Projetada e servida pelo mock**, sem tela"* |
+| `07-nao-feito.md` | *"**Especificado e servido pelo mock** (`GET /documentos` com filtro e cursor), sem tela"* |
+| `07-nao-feito.md` (custo) | *"O **contrato já existe**; falta a tela…"* |
+
+**O que existe de fato:** `GET /documentos` aceita **`estado`, `cursor` e
+`limite`** — só isso. Não há parâmetro de termo no `openapi.yaml`, e
+`mocks/handlers.ts` lê exatamente esses três. O que está servido é **listagem
+filtrada por estado**, que é o que a fila de conferência consome; **busca por
+nome, CPF ou número nunca foi especificada.**
+
+**Por que a frase enganava:** "projetada e servida pelo mock" faz o leitor
+concluir que só falta a tela — quando falta o contrato, os tipos gerados, o
+mock e a tela. A diferença entre 3 h e "3 h mais o contrato" é pequena em
+esforço e grande em honestidade, porque a primeira versão faz o trabalho parecer
+mais adiantado do que está.
+
+**Correção aplicada — e a alternativa descartada.** Havia duas saídas:
+
+- **(a) corrigir o texto**, dizendo "listagem filtrada por estado, servida pelo
+  mock; busca por termo não especificada";
+- **(b) acrescentar `q` ao `openapi.yaml` e ao mock**, regerar os tipos e testar
+  o filtro, tornando a frase verdadeira.
+
+**Escolhi (a).** (b) faria a frase virar verdade acrescentando **superfície de
+contrato sem consumidor** — um parâmetro que nenhuma tela exerce, criado no fim
+do prazo para justificar um texto escrito antes. Isso é a mesma classe de
+problema que as D-06 e D-07: afirmação primeiro, lastro depois. O argumento
+desta entrega é a fatia estreita e honesta; a correção que a sustenta é a que
+faz o texto descrever o que existe, não a que amplia o que existe para caber no
+texto.
+
+**Veredito: o texto estava errado, e a ausência continua declarada.**
+
+---
+
+## D-11 — `aria-modal="true"` declarado e não cumprido nos dois diálogos
+
+**O texto dizia** (`07-nao-feito.md`, seção "Reduzido de propósito"):
+*"Feito: navegação por teclado na conferência, rótulos associados, foco
+visível."*
+
+**O que existia:** `ConflitoDialog` e `RejeitarDialog` traziam `role="dialog"` e
+`aria-modal="true"` **sem foco inicial, sem Escape, sem retorno de foco e sem
+contenção de Tab**. A afirmação era verdadeira para o painel de campos e falsa
+para os dois pontos em que a pessoa é interrompida por um modal.
+
+**Por que isso é pior que não declarar:** o leitor de tela **confia** no
+atributo e informa que se está num contexto modal. Quem depende dele tabula
+para fora achando que está protegido; quem aperta Escape não sai; quem fecha
+perde o lugar, porque o foco volta ao `<body>` e a próxima tabulação recomeça do
+topo da página. O atributo transformava uma ausência de recurso em informação
+errada.
+
+**O que foi feito:** um único `src/shared/ui/Dialogo.tsx` resolve os quatro
+pontos, e os dois diálogos passaram a usá-lo. Verificado em
+`tests/features/dialogo.test.tsx` pelo caminho real (abrir a rejeição a partir
+da conferência), não por harness sintético — o defeito estava na montagem.
+
+**Alternativa descartada: `<dialog>` nativo com `showModal()`**, que traria
+contenção de foco e Escape de graça no navegador. **O jsdom não implementa
+`showModal()`**, e a conferência é a tela mais coberta por testes desta entrega.
+Trocar cobertura de teste real por ~40 linhas de gerência de foco não compensa
+aqui. Em um projeto sem essa restrição, `<dialog>` seria a escolha certa —
+fica registrado como a primeira troca a fazer quando o ambiente de teste
+permitir.
+
+**Veredito:** omissão do código, não da spec. Mas o texto **afirmava mais do que
+existia**, e é por isso que a entrada está aqui e não só no histórico.

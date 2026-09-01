@@ -71,7 +71,7 @@ envio em lote → acompanhamento → fila de conferência → correção de camp
 |---|---|---|
 | 1 | Receber documento (imagem ou PDF) | **implementado** |
 | 2 | Descobrir o tipo, extrair campos, propor nome | **implementado** (extração é do mock) |
-| 3 | Consultar resultado e listar processados | **parcial** — acompanhamento sim, busca não |
+| 3 | Consultar resultado e listar processados | **parcial** — consulta e listagem por estado sim; busca por termo não está no contrato |
 | 4 | Portão de confiança e conferência humana | **implementado** |
 | 5 | Ser consumido por sistemas internos | **contrato definido e servido** |
 
@@ -234,8 +234,10 @@ repositório afirmam praticar.
 - **Sem autenticação.** A identidade vem do host interno por cabeçalho
   ([ADR-011](docs/adr/011-identidade-delegada-ao-host.md)). Apague
   `VITE_USUARIO_ID` do `.env` para ver a degradação anônima funcionando.
-- **Sem busca.** Projetada e servida pelo mock, sem tela
-  ([`07-nao-feito.md`](docs/spec/07-nao-feito.md)).
+- **Sem busca por termo.** O contrato tem `GET /documentos` com **filtro por
+  estado, limite e cursor** — é isso que o mock serve e é o que a fila usa.
+  **Busca por termo não foi especificada** e não existe tela
+  ([`07-nao-feito.md`](docs/spec/07-nao-feito.md), [D-10](docs/spec/08-divergencias.md)).
 - **A fila pagina por cursor, mas não é virtualizada** — a spec prometia as duas
   coisas ([D-06](docs/spec/08-divergencias.md)).
 - **Sem bloqueio por inatividade** na conferência ([D-07](docs/spec/08-divergencias.md)).
