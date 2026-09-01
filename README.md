@@ -68,7 +68,7 @@ A entrega inteira se apoia na afirmação de que o front-end não conhece nenhum
 tipo de documento. **Não acredite; rode:**
 
 ```bash
-npm test                    # 64 testes, inclusive as guardas de arquitetura
+npm test                    # 95 testes, inclusive as guardas de arquitetura
 git show spec-v1 --stat     # a spec, congelada ANTES do primeiro commit de código
 npm run gen:api             # regenera os tipos do OpenAPI: o diff sai vazio
 ```
@@ -164,7 +164,7 @@ desaparece em silêncio e o dado errado segue para a planilha e para o processo.
 
 ```
 docs/spec/       a especificação, escrita ANTES do código      ← tag spec-v1
-docs/adr/        13 decisões, com as alternativas descartadas
+docs/adr/        15 decisões, com as alternativas descartadas
 docs/plano/      o plano de implementação em 16 tarefas
 docs/ia/         prompts, verificações, tempo real, transcrição da sessão
 docs/enunciado.md
@@ -196,7 +196,7 @@ Regra de dependência `app → pages → features → entities → shared`,
 
 ## O que escolhi testar, e por quê
 
-São 64 testes, e o critério para escrevê-los não foi cobertura: foi **o que
+São 95 testes, e o critério para escrevê-los não foi cobertura: foi **o que
 quebraria em silêncio**. Um botão que some é descoberto em cinco minutos de uso;
 uma correção de campo sobrescrita por outra pessoa não é descoberta nunca — vira
 dado errado numa planilha e reaparece semanas depois dentro de um processo. Por
@@ -239,18 +239,20 @@ como trabalho próprio seria desonesto.
 
 Ao final, pus um **subagente auditor** para conferir a entrega contra o enunciado,
 em contexto frio, com uma instrução no centro: *não acreditar na narrativa do
-repositório sobre si mesmo*. Rodei três vezes.
+repositório sobre si mesmo*. Rodei **quatro vezes**.
 
 Cada rodada encontrou o que a correção anterior tinha introduzido. Na terceira, o
 auditor nomeou o padrão: **o defeito não está no item apontado — está no vizinho
-aritmético dele, ou no outro documento que o cita.**
+aritmético dele, ou no outro documento que o cita.** A quarta rodou depois de uma
+auditoria externa ao repositório, cujo prompt está íntegro em
+[`prompts/0014`](docs/ia/prompts/0014-2026-09-01-auditoria-externa-defeitos.md).
 
 As **transcrições das quatro rodadas** estão em
 [`docs/ia/transcricao/auditorias/`](docs/ia/transcricao/auditorias/), com os 110
 comandos que o auditor rodou **na íntegra** — é neles que se vê a verificação
 acontecendo, e não apenas a conclusão dela. A história em prosa está em
-[`V-007`](docs/ia/registro-de-verificacao.md), e a conclusão é a única coisa
-desta entrega que eu levaria para qualquer projeto:
+[`V-007` e `V-008`](docs/ia/registro-de-verificacao.md), e a conclusão é a única
+coisa desta entrega que eu levaria para qualquer projeto:
 
 > O autor não consegue auditar o próprio texto contra o próprio código, porque lê
 > o texto e lembra da intenção em vez de ver o que ficou. O valor do subagente não
