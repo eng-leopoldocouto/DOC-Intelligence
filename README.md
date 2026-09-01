@@ -1,7 +1,7 @@
 # DOC Intelligence — interface do atendimento
 
 [![CI](https://github.com/eng-leopoldocouto/DOC-Intelligence/actions/workflows/ci.yml/badge.svg)](https://github.com/eng-leopoldocouto/DOC-Intelligence/actions/workflows/ci.yml)
-![Testes](https://img.shields.io/badge/testes-95-brightgreen)
+![Testes](https://img.shields.io/badge/testes-96-brightgreen)
 ![Typecheck](https://img.shields.io/badge/typescript-estrito-blue)
 ![Lint](https://img.shields.io/badge/oxlint-0%20avisos-brightgreen)
 
@@ -59,8 +59,9 @@ estimativa é opinião.
 **[`docs/spec/05-fatos-do-ambiente.md`](docs/spec/05-fatos-do-ambiente.md)**
 
 Sete fatos, cada um com a consequência que enxerguei, a decisão tomada, onde ela
-vive no código e o **risco residual**. Três foram resolvidos, quatro foram
-tratados *e* deixaram risco registrado. Nenhum ficou sem resposta.
+vive no código e o **risco residual**. **Os sete foram tratados, e os sete
+deixaram risco residual escrito** — inclusive os que considero resolvidos, porque
+nenhuma decisão fecha o assunto por completo. Nenhum ficou sem resposta.
 
 ### 3. Confira que o texto corresponde ao código — 1 min
 
@@ -68,7 +69,7 @@ A entrega inteira se apoia na afirmação de que o front-end não conhece nenhum
 tipo de documento. **Não acredite; rode:**
 
 ```bash
-npm test                    # 95 testes, inclusive as guardas de arquitetura
+npm test                    # 96 testes, inclusive as guardas de arquitetura
 git show spec-v1 --stat     # a spec, congelada ANTES do primeiro commit de código
 npm run gen:api             # regenera os tipos do OpenAPI: o diff sai vazio
 ```
@@ -119,7 +120,7 @@ os dois modos de falha do fato (a) apareçam sem depender de sorte.
 
 | Comando | O que faz |
 |---|---|
-| `npm test` | 95 testes, incluindo as guardas de arquitetura |
+| `npm test` | 96 testes, incluindo as guardas de arquitetura |
 | `npm run typecheck` | TypeScript estrito |
 | `npm run lint` | oxlint, zero avisos ([D-08](docs/spec/08-divergencias.md), fechada) |
 | `npm run build` | Build de produção |
@@ -170,7 +171,7 @@ docs/ia/         prompts, verificações, tempo real, transcrição da sessão
 docs/enunciado.md
 fixtures/        documentos fictícios e como regerá-los
 src/             a fatia vertical
-tests/           95 testes, incluindo guardas de arquitetura
+tests/           96 testes, incluindo guardas de arquitetura
 .claude/agents/  o subagente auditor, autorado para esta prova
 .claude/hooks/   o hook que BLOQUEIA a escrita que quebraria as regras 2 e 3
 .github/         a CI que faz as guardas falharem o build de verdade
@@ -196,7 +197,7 @@ Regra de dependência `app → pages → features → entities → shared`,
 
 ## O que escolhi testar, e por quê
 
-São 95 testes, e o critério para escrevê-los não foi cobertura: foi **o que
+São 96 testes, e o critério para escrevê-los não foi cobertura: foi **o que
 quebraria em silêncio**. Um botão que some é descoberto em cinco minutos de uso;
 uma correção de campo sobrescrita por outra pessoa não é descoberta nunca — vira
 dado errado numa planilha e reaparece semanas depois dentro de um processo. Por

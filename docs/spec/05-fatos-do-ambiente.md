@@ -249,12 +249,17 @@ rede, **brutal para a interface**, em três pontos:
 - **Polling pausa com a aba oculta** (`visibilitychange`). O atendimento deixa a
   aba aberta o dia todo.
 - **Concorrência de upload limitada a 3**, com fila local. O restante espera.
-- **Lista virtualizada** e paginação por cursor. O DOM não cresce com a fila.
+- ~~**Lista virtualizada**~~ e paginação por cursor. **A virtualização NÃO foi
+  implementada** — a paginação, sim. A frase riscada ficou aqui, e não apagada,
+  porque a spec é entregue como estava; o que ela deixou de ser verdade está em
+  [D-06](08-divergencias.md). O DOM cresce se alguém pedir "carregar mais"
+  muitas vezes seguidas.
 
 ### Onde vive
 
 `features/processing/usePollingLote.ts` · `features/upload/filaDeEnvio.ts` ·
-`features/review/ListaVirtualizada.tsx`
+~~`features/review/ListaVirtualizada.tsx`~~ (**este arquivo não existe** — D-06)
+· `features/review/useFilaDeConferencia.ts` (a paginação, que existe)
 
 ### Acrescentado em 01/09 — a fila diz o próprio tamanho
 

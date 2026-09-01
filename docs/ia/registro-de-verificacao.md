@@ -210,7 +210,7 @@ declarado.
 
 ---
 
-## V-008 — 01/09/2026, manhã · Auditoria externa: o hook disparou, e abrir a tela achou três defeitos meus
+## V-008 — 01/09/2026, manhã · Auditoria externa: quatro defeitos meus, nenhum pego por teste
 
 Uma auditoria **externa a este repositório** devolveu uma lista em quatro blocos.
 O prompt está íntegro em
@@ -221,7 +221,7 @@ O prompt está íntegro em
 | Verificação | Comando | Resultado |
 |---|---|---|
 | Base antes de mexer | `npm run typecheck && npm test` | limpo, **64 testes** |
-| Depois de tudo | `npm run typecheck && npm run lint && npm test` | limpo, **0 avisos**, **95 testes** |
+| Depois de tudo | `npm run typecheck && npm run lint && npm test` | limpo, **0 avisos**, **96 testes** |
 | O linter não é vácuo | violação deliberada em `fila.ts` | saída **1**; removida, saída **0** |
 | O passo de CI dos tipos | `npm run gen:api && git diff --exit-code` | diff **vazio** |
 | O hook bloqueia | JSON na entrada padrão, cinco casos | `fetch(` fora de `shared/api/` → **2**; dentro → 0; tipo de documento em `features/` → **2**; em `mocks/` → 0; **em comentário → 0** |
@@ -241,7 +241,7 @@ apagar explicação — e o teste de arquitetura já tinha aprendido essa liçã
 jeito difícil (V-004). Um hook que repete um erro que o repositório já corrigiu
 uma vez é pior que hook nenhum.
 
-### Onde o agente errou desta vez — três vezes, e nenhuma foi pega por teste
+### Onde o agente errou desta vez — quatro vezes, e nenhuma foi pega por teste
 
 **1. O aviso do segundo portão mentia.** O agente escreveu o texto *"O modelo
 confia (X%), o formato não fecha"* para todo campo reprovado no formato. Abri a
@@ -270,13 +270,40 @@ não foi omissão, foi um achado inventado com aparência de evidência. Mantive
 mas reescrevi a justificativa e registro aqui, porque *"encontrei um problema"*
 sem lastro é a mesma falha das D-06 e D-09, apenas com o sinal trocado.
 
+**4. O foco pulava para outro campo enquanto a pessoa digitava.** Encontrado
+relendo o `Dialogo.tsx` enquanto o auditor rodava, e é o mais sutil dos quatro. O
+efeito que instala a contenção de foco dependia de `aoFechar` — e quem monta o
+diálogo passa `onCancelar={() => setRejeitando(false)}`, uma closure **nova a
+cada render do pai**. O pai re-renderiza sozinho: `useClaim` renova a reserva por
+`setInterval` enquanto a tela está aberta. A cada renovação o efeito era
+desmontado e remontado, e o foco saltava do campo de observação de volta para o
+seletor de motivo. Quem estivesse escrevendo a justificativa de uma rejeição
+perderia o cursor de tempos em tempos, sem entender por quê.
+
+Corrigido com `aoFechar` numa ref e o efeito rodando uma vez. **E o teste de
+regressão errou antes de acertar:** a primeira versão dele passava com e sem o
+defeito, porque no harness que escrevi o campo digitado já era o primeiro
+focável — não havia para onde o foco saltar. Só ficou claro depois de eu forçar
+a falha removendo a correção. Um teste que passa dos dois lados é pior que teste
+nenhum: compra tranquilidade sem entregar nada.
+
 ### A lição que muda o método, de novo
 
 As três rodadas anteriores ensinaram **procurar pelo número, não pelo assunto**.
-Esta acrescenta a segunda metade: **abrir a tela.** Os três erros acima passaram
-por `typecheck`, por `lint`, por 95 testes e pela minha leitura — e os três
-morreram em menos de um minuto de navegador. Teste verifica o que alguém pensou
-em verificar; a tela mostra o que ninguém pensou.
+Esta acrescenta duas coisas.
+
+**Abrir a tela.** Os quatro erros acima passaram por `typecheck`, por `lint`, por
+96 testes e pela minha leitura. Dois deles morreram em menos de um minuto de
+navegador aberto — e nenhum teste os pegaria, porque teste verifica o que alguém
+pensou em verificar.
+
+**Forçar o teste a falhar antes de confiar nele.** Fiz isso três vezes nesta
+rodada, e nas três valeu: no linter (violação deliberada → saída 1), no teste que
+compara a lista do hook com a do teste de arquitetura (cópia deliberada →
+falhou), e no teste de foco — que **passava com e sem o defeito** até eu tentar.
+Sem essa tentativa, eu teria entregado um teste decorativo dentro da mesma
+rodada em que fechei a D-08 justamente por causa de listas de verificação
+decorativas.
 
 **Ressalva sobre este arquivo, de novo:** esta entrada também foi escrita ao
 final da rodada, e não no momento de cada fato. A diferença para a anterior é

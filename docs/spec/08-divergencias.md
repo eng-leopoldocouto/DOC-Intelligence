@@ -208,7 +208,7 @@ varre nada passa igual.
 documento hardcoded *"falha o build"*.
 
 **O que foi feito:** a guarda existe e funciona — `tests/arquitetura/fronteiras.test.ts`,
-seis asserções, todas passando. Mas ela roda em `npm test`, e `npm run build` é
+sete asserções, todas passando. Mas ela roda em `npm test`, e `npm run build` é
 apenas `tsc -b && vite build`. **Não há CI.** Quem rodar só o build não vê a
 guarda.
 

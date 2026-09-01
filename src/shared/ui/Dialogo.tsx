@@ -21,7 +21,7 @@
  *
  * Por que não `<dialog>` nativo: o jsdom não implementa `showModal()`, e a
  * conferência é a tela mais testada da entrega. Trocar cobertura de teste por
- * ~40 linhas de foco não compensa aqui. Registrado em D-10.
+ * ~40 linhas de foco não compensa aqui. Registrado em D-11.
  */
 import { useEffect, useId, useRef, type ReactNode } from 'react'
 
@@ -46,6 +46,22 @@ export function Dialogo({
   const caixa = useRef<HTMLDivElement>(null)
   const idTitulo = useId()
 
+  /**
+   * `aoFechar` numa ref, e o efeito roda UMA vez.
+   *
+   * Não é preciosismo — é um defeito com sintoma. Quem chama passa
+   * `onCancelar={() => setRejeitando(false)}`, uma closure nova a cada render
+   * do pai. E o pai re-renderiza sozinho: `useClaim` renova a reserva por
+   * `setInterval` enquanto a tela está aberta.
+   *
+   * Com `[aoFechar]` na lista de dependências, cada renovação desmontava e
+   * remontava o efeito: o foco era devolvido a quem abriu e mandado de volta
+   * para o primeiro campo. Na prática, a pessoa digitando a observação da
+   * rejeição perdia o cursor de tempos em tempos, sem entender por quê.
+   */
+  const fechar = useRef(aoFechar)
+  fechar.current = aoFechar
+
   useEffect(() => {
     const anterior = document.activeElement as HTMLElement | null
 
@@ -56,7 +72,7 @@ export function Dialogo({
     const aoTeclar = (e: KeyboardEvent) => {
       if (e.key === 'Escape') {
         e.stopPropagation()
-        aoFechar()
+        fechar.current()
         return
       }
       if (e.key !== 'Tab' || !caixa.current) return
@@ -90,10 +106,14 @@ export function Dialogo({
       // sumiu, o botão que virou "Salvando…").
       if (anterior?.isConnected) anterior.focus()
     }
-  }, [aoFechar])
+    // Sem dependências, de propósito: ver o comentário acima da ref `fechar`.
+  }, [])
 
   return (
-    <div className="dialogo-fundo" onMouseDown={(e) => { if (e.target === e.currentTarget) aoFechar() }}>
+    <div
+      className="dialogo-fundo"
+      onMouseDown={(e) => { if (e.target === e.currentTarget) aoFechar() }}
+    >
       <div
         className="dialogo"
         role="dialog"

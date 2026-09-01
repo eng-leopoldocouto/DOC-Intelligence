@@ -17,14 +17,12 @@ fila, a deduplicação perceptual e a trilha de auditoria de leitura. Cada uma
 está em `07-nao-feito.md` com custo estimado e o **gatilho** que a tornaria
 necessária, porque "não fiz" sem estimativa é opinião.
 
-Vale dizer *como* essa primeira frase chegou a esta forma, porque é o tipo de
-coisa que se corrige tarde. Até a última rodada, quatro documentos meus diziam
-que a busca estava "projetada e servida pelo mock" — e o `openapi.yaml` não tem
-parâmetro de termo nenhum. A frase não era mentira deliberada; era otimismo que
-ninguém releu. Podia tê-la tornado verdadeira acrescentando o parâmetro ao
-contrato em vinte minutos, e **escolhi corrigir o texto**: acrescentar
-superfície de contrato sem consumidor, no fim do prazo, para justificar uma
-frase escrita antes, é a mesma falha com o sinal trocado.
+Vale dizer como essa frase chegou a esta forma. Até a última rodada, quatro
+documentos meus diziam que a busca estava "projetada e servida pelo mock" — e o
+`openapi.yaml` não tem parâmetro de termo nenhum. Podia tê-la tornado verdadeira
+acrescentando o parâmetro em vinte minutos, e **escolhi corrigir o texto**:
+acrescentar superfície de contrato sem consumidor, no fim do prazo, para
+justificar uma frase escrita antes, é a mesma falha com o sinal trocado.
 
 Duas ausências me incomodam mais que as outras. O **HEIC do iPhone** é recusado
 com uma mensagem que ensina a mudar o ajuste da câmera: é solução organizacional
@@ -77,12 +75,11 @@ A correção não é difícil: rascunho local que expira junto com a reserva, co
 aviso explícito de que não está salvo no servidor. Não a fiz por prazo, e é a
 primeira coisa que eu mudaria.
 
-**A resposta não mudou na última rodada — ela ficou pior.** Ao escrever a
-fronteira de erro que faltava, tive de redigir o que a tela diz quando quebra no
-meio de uma conferência, e a frase honesta foi: *"se você acabou de corrigir
-campos sem salvar, o que estava na tela se perdeu"*. Escrever isso é admitir por
-extenso a consequência da decisão. Um defeito que eu justificava pela limpeza do
-modelo de estados passou a ter uma tela dedicada a informar a perda.
+**A resposta não mudou na última rodada — ficou pior.** Ao escrever a fronteira
+de erro que faltava, tive de redigir o que a tela diz quando quebra no meio de
+uma conferência: *"se você acabou de corrigir campos sem salvar, o que estava na
+tela se perdeu"*. Um defeito que eu justificava pela limpeza do modelo de estados
+passou a ter uma tela dedicada a informar a perda.
 
 ## Quanto tempo isso tudo levou
 
@@ -92,29 +89,19 @@ terminou na madrugada do dia seguinte, com uma interrupção de cerca de duas
 horas por limite de uso da ferramenta, não contabilizada.
 
 Devo uma ressalva sobre esse arquivo, e ela é a coisa mais útil que aprendi
-nesta entrega. Três linhas dele traziam horários **estimados para a frente** — o
-commit que as gravou é anterior ao horário que elas declaravam como início. O
-agente auditor apontou, comparando a tabela com o `git log`. Corrigi. **E
-reincidi na correção**: ao consertar duas linhas, escrevi na terceira um término
-dezoito minutos à frente do commit que a gravava, dentro do parágrafo que
-acabara de explicar por que isso é inaceitável. A segunda auditoria pegou.
+nesta entrega. Ele trazia horários **estimados para a frente** — o commit que os
+gravou é anterior ao horário declarado como início. O auditor apontou. Corrigi,
+**e reincidi na correção duas vezes**: primeiro escrevendo outro carimbo futuro
+dentro do parágrafo que acabara de explicar por que isso é inaceitável; depois
+mudando dois valores da coluna e repetindo o total antigo no mesmo diff.
 
 O conserto definitivo não foi um número melhor: foi tirar do arquivo a
-possibilidade de errar. A coluna "fim" da fase em andamento passou a dizer *"ver
-último commit"* — não se data prospectivamente um campo que aponta para o
-histórico.
-
-**E caí uma terceira vez**, no mesmo arquivo: ao consertar a fase 8, mudei dois
-valores da coluna e repeti o total antigo no mesmo diff. A terceira auditoria
-pegou, e nomeou o padrão que eu não estava vendo: *o defeito não está no item
-apontado — está no vizinho aritmético dele, ou no outro documento que o cita.*
-Daí a regra que passei a seguir e que devia ter seguido desde o início:
-**procurar pelo número, não pelo assunto**. `grep` do número acha em quinze
-segundos o que reler o parágrafo não achou três vezes.
-
-Registrei as três correções em vez de apagar os erros. Um documento que se
-apresenta como relógio real não pode conter estimativa disfarçada — e as quedas
-sucessivas dizem mais sobre como eu trabalho do que a versão limpa diria.
+possibilidade de errar — a coluna "fim" da fase em andamento passou a dizer *"ver
+último commit"*. E a terceira auditoria nomeou o padrão que eu não via: *o
+defeito não está no item apontado — está no vizinho aritmético dele, ou no outro
+documento que o cita.* Daí a regra que passei a seguir: **procurar pelo número,
+não pelo assunto**. Registrei as três quedas em vez de apagá-las; elas dizem
+mais sobre como eu trabalho do que a versão limpa diria.
 
 A distribuição diz mais que o total: **por volta de 40% do tempo foi spec, ADRs
 e registro de decisão, antes de existir uma linha de código.** A especificação
@@ -143,8 +130,10 @@ introduziu. O agente não erra por incompetência; erra por escopo de atenção 
 corrige com precisão o que foi apontado e não olha ao lado. **Eu também não. A
 diferença é que eu achava que estava olhando.**
 
-A última rodada acrescentou a segunda metade da lição, e ela é mais barata: os
-três erros que restaram passaram por tipo estrito, por linter, por noventa e
-cinco testes e pela minha leitura, e morreram todos em menos de um minuto de
-navegador aberto. **Teste verifica o que alguém pensou em verificar. A tela
-mostra o que ninguém pensou.**
+A última rodada acrescentou a segunda metade da lição. Restaram quatro erros
+depois de tudo pronto, e **nenhum foi pego por teste** — passaram por tipo
+estrito, por linter, por noventa e seis testes e pela minha leitura. Dois
+morreram em menos de um minuto de navegador aberto; um, refazendo uma medição
+que eu tinha aceitado; o último, relendo código enquanto esperava o auditor.
+**Teste verifica o que alguém pensou em verificar. Abrir a tela mostra o que
+ninguém pensou — e reler o que já passou mostra o resto.**

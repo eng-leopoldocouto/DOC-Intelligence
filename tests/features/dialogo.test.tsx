@@ -11,11 +11,12 @@
  * original estava justamente na montagem, não na ideia.
  */
 import { describe, it, expect, beforeAll, afterAll, afterEach, beforeEach } from 'vitest'
-import { screen } from '@testing-library/react'
+import { render, screen } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { servidorDeTeste } from '@/mocks/node'
 import { configurarParaTeste, criarDocumento, limpar, limparReservas, materializar } from '@/mocks/dados'
 import { PaginaConferencia } from '@/pages/PaginaConferencia'
+import { Dialogo } from '@/shared/ui/Dialogo'
 import { renderizarEmRota } from './apoio'
 
 beforeAll(() => servidorDeTeste.listen({ onUnhandledRequest: 'bypass' }))
@@ -62,6 +63,59 @@ describe('Dialogo — as quatro obrigações de um modal', () => {
     // 4. o foco voltou para o botão que abriu. Devolvê-lo ao <body> faria a
     //    próxima tabulação recomeçar do topo da página.
     expect(document.activeElement).toBe(botaoQueAbre)
+  })
+
+  it('o foco NÃO pula quando a tela de trás re-renderiza sozinha', () => {
+    // A conferência re-renderiza sozinha: `useClaim` renova a reserva por
+    // `setInterval` enquanto a tela está aberta, e quem monta o diálogo passa
+    // `aoFechar={() => setRejeitando(false)}` — uma closure NOVA a cada render.
+    //
+    // Se o efeito do diálogo depender dela, cada renovação desmonta e remonta o
+    // efeito: o foco volta para quem abriu e é mandado de novo para o primeiro
+    // campo. Quem estivesse digitando a observação perderia o cursor de tempos
+    // em tempos, sem entender por quê.
+    //
+    // O teste ataca o mecanismo direto, e não pelo caminho da tela: o que
+    // precisa ficar provado é que uma IDENTIDADE nova de `aoFechar` não mexe no
+    // foco. Testar pela tela dependeria de o temporizador disparar, e um teste
+    // que passa com e sem o defeito não vale nada — este passou, na primeira
+    // versão, exatamente assim.
+    // O conteúdo espelha o diálogo de rejeição: o PRIMEIRO focável é o seletor
+    // de motivo, e a pessoa está digitando no campo de observação, mais abaixo.
+    // É essa distância que torna o salto visível — um harness em que o campo
+    // digitado já é o primeiro focável passaria com e sem o defeito.
+    const conteudo = (
+      <Dialogo titulo="Título" aoFechar={() => {}} acoes={<button type="button">Fechar</button>}>
+        <label htmlFor="motivo">Motivo</label>
+        <select id="motivo" defaultValue="">
+          <option value="">Escolha</option>
+        </select>
+        <label htmlFor="obs">Observação</label>
+        <textarea id="obs" defaultValue="" />
+      </Dialogo>
+    )
+
+    const { rerender } = render(conteudo)
+
+    const area = screen.getByLabelText('Observação')
+    area.focus()
+    expect(document.activeElement).toBe(area)
+
+    // Exatamente o que um render do pai produz: outra função, mesmo efeito.
+    // `cloneElement` daria a MESMA identidade de `aoFechar`; o elemento é
+    // remontado para que a closure seja de fato outra.
+    rerender(
+      <Dialogo titulo="Título" aoFechar={() => {}} acoes={<button type="button">Fechar</button>}>
+        <label htmlFor="motivo">Motivo</label>
+        <select id="motivo" defaultValue="">
+          <option value="">Escolha</option>
+        </select>
+        <label htmlFor="obs">Observação</label>
+        <textarea id="obs" defaultValue="" />
+      </Dialogo>,
+    )
+
+    expect(document.activeElement).toBe(area)
   })
 
   it('Tab não escapa do diálogo: dos extremos, ele dá a volta', async () => {
