@@ -341,9 +341,21 @@ existia para impedir esse tipo de erro, pego pela própria ferramenta do commit.
 Verificado que ele morde: dois números trocados de propósito no README →
 saída 1, com a lista do que não bate; restaurados → saída 0.
 
-**A-06 fica aberto, e por escolha declarada.** `onde-o-agente-errou.md` é o
-parágrafo em primeira pessoa que o item II.4 pede, e a seção 7 do `CLAUDE.md`
-diz que **o agente não escreve conteúdo em primeira pessoa do candidato**. Ele
-não incorpora os quatro erros desta rodada — inclusive o mais instrutivo, o
-achado inventado. O material está aqui em V-008, com arquivo e comando; o
-parágrafo é meu para escrever.
+**A-06 ficou aberto por algumas horas, e a forma como fechou é o próprio ponto.**
+`onde-o-agente-errou.md` é o parágrafo em primeira pessoa que o item II.4 pede, e
+a seção 7 do `CLAUDE.md` diz que **o agente não escreve conteúdo em primeira
+pessoa do candidato**. Quando o auditor apontou que o arquivo não trazia os erros
+desta rodada, o agente não o escreveu por conta própria: deixou o achado aberto e
+declarado, com o material pronto aqui em V-008. **Pedi o rascunho, revisei e
+aprovei** — e só então ele foi para o arquivo.
+
+Duas coisas que valem registro. Ao aplicar o texto aprovado, o agente encontrou
+uma **colisão que nem ele nem eu tínhamos visto no rascunho**: a frase nova
+começava com "A quarta não foi" e o parágrafo imediatamente seguinte já abria com
+"A quarta correção não foi minha", falando de outra coisa. Reescreveu para não
+repetir o ordinal e me avisou da mudança em vez de aplicá-la calado. É o mesmo
+defeito de vizinhança de sempre, desta vez pego antes de virar texto entregue.
+
+E o arquivo passou a conter a admissão do erro nº 3 desta rodada — o achado
+inventado —, que é material que só existe porque o agente errou e o registro
+estava escrito de um jeito conferível.

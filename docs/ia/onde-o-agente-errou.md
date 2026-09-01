@@ -38,8 +38,11 @@ do comando colada em vez da afirmação de que passou.
 
 O que aprendi conduzindo: o agente é excelente executando uma decisão e
 péssimo percebendo que a decisão está mal enquadrada. Ele não pergunta "isto é o
-que mais vale?" — ele pergunta "como faço isto bem?". As três correções de rumo
-desta entrega foram todas minhas, e nenhuma delas era técnica.
+que mais vale?" — ele pergunta "como faço isto bem?". As correções de rumo desta
+entrega foram minhas, e nenhuma delas era técnica — com **uma exceção, que só
+apareceu na última rodada** e está no fim deste documento: quem enxergou que eu
+vinha tratando um padrão como descuido, e não como defeito de processo, foi o
+agente auditor.
 
 **A quarta correção não foi minha, e é a mais interessante.** Ao final, pus um
 subagente auditor para conferir a entrega contra o enunciado, em contexto frio.
@@ -55,3 +58,53 @@ narrativa do repositório sobre si mesmo"* — e era eu quem estava acreditando 
 minha. Um autor não consegue auditar o próprio texto contra o próprio código,
 porque lê o texto e lembra da intenção em vez de ver o que ficou. **O valor do
 subagente não foi capacidade técnica: foi não ter memória do que eu quis dizer.**
+
+**A rodada seguinte trouxe o erro que eu não sabia procurar: o agente afirmou ter
+encontrado um defeito que não existia.** Uma auditoria externa ao repositório
+devolveu uma lista de correções e, ao trabalhá-la, o agente criou um
+`.gitattributes` justificando-o com a descoberta de que a integração contínua
+quebraria sempre no Linux por causa de quebras de linha gravadas em CRLF. A
+justificativa vinha com medição — um comando contando ocorrências. O comando
+estava errado: depois de passar pelo shell, procurava a **letra "r"** em vez do
+caractere de retorno, e contava linhas quaisquer. O arquivo sempre esteve em LF,
+e não havia defeito nenhum. Percebi refazendo a medição, e só a refiz porque ela
+estava escrita. Um número num comentário é conferível; uma impressão não é.
+
+Este é o oposto de tudo que está acima, e por isso o mais instrutivo. Os erros
+anteriores eram omissões — o agente não via o que não tinha sido apontado. Este
+foi um **achado fabricado com aparência de evidência**, na mesma rodada em que o
+repositório inteiro estava sendo corrigido por afirmar coisas sem lastro. Um
+agente que erra por omissão é caro; um que erra por excesso de confiança na
+própria verificação é perigoso, porque produz justamente o formato de texto que
+a gente aprende a confiar: o que traz o comando junto.
+
+Os outros três da mesma rodada dizem menos, e ainda assim **nenhum foi pego por
+teste**. O aviso do segundo portão de confiança exibia *"o modelo confia (60%)"*
+num campo cuja confiança era baixa — contradição que só aparece com um documento
+na tela. A semeadura do mock deixava dois recursos novos invisíveis: a fila só
+destacava pressão acima de sessenta minutos, e o documento mais antigo esperava
+cinquenta e cinco. E o foco saltava do campo que a pessoa estava digitando de
+volta para o primeiro do formulário, a cada renovação da reserva, porque um
+efeito dependia de uma função recriada a cada render. Os quatro passaram por tipo
+estrito, por linter, por noventa e seis testes e pela minha leitura. Dois
+morreram em menos de um minuto de navegador aberto; um, refazendo uma conta; o
+último, relendo código.
+
+E o teste de regressão que escrevi para o quarto **passava com e sem o defeito** —
+no cenário que montei, o foco não tinha para onde saltar. Só descobri porque
+removi a correção de propósito, para ver o teste falhar. Passei a fazer isso
+sempre: nesta rodada forcei três verificações a falhar antes de confiar nelas, e
+a terceira era essa. Um teste que passa dos dois lados é pior que teste nenhum,
+porque compra tranquilidade sem entregar nada — e eu quase o entreguei dentro da
+mesma rodada em que fechei a D-08 justamente por causa de listas de verificação
+decorativas.
+
+O que mudou no método é a única conclusão que eu levaria daqui: **parei de
+responder a esse padrão com disciplina.** Quatro rodadas de auditoria encontraram
+a mesma classe de defeito quatro vezes — um número escrito num documento e
+desmentido pelo repositório —, e nas três primeiras a minha resposta foi uma
+regra melhor para mim mesmo. Na quarta, o auditor deixou de listar ocorrências e
+apontou a causa: *o número mora em dois lugares*. A resposta virou um comando na
+integração contínua, que compara o que o README afirma com o que o repositório
+tem — e que encontrou um erro meu no minuto em que passou a existir. Disciplina
+funciona até a vez em que não funciona, e essa vez chegou quatro vezes seguidas.
