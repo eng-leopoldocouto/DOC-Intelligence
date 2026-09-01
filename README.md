@@ -193,7 +193,7 @@ Trabalhei com **Claude Opus 5** em sessão interativa. O registro completo está
 | [`registro-de-verificacao.md`](docs/ia/registro-de-verificacao.md) | Sete entradas: o que o agente produziu, o que conferi, onde errou, o que fiz |
 | [`onde-o-agente-errou.md`](docs/ia/onde-o-agente-errou.md) | O parágrafo em primeira pessoa exigido pelo enunciado |
 | [`registro-de-tempo.md`](docs/ia/registro-de-tempo.md) | Relógio real por fase, **com três correções registradas em vez de apagadas** |
-| [`transcricao/`](docs/ia/transcricao/) | A sessão inteira, gerada por script a partir do log local. Não editada à mão |
+| [`transcricao/`](docs/ia/transcricao/) | A sessão inteira **e as quatro rodadas de auditoria**, com os comandos que o auditor rodou na íntegra. Geradas por script, não editadas à mão |
 
 **A fronteira do que é meu:** o `CLAUDE.md` e o subagente auditor foram autorados
 para esta prova. Os plugins Superpowers e ECC já estavam instalados no ambiente e
@@ -209,9 +209,14 @@ repositório sobre si mesmo*. Rodei três vezes.
 
 Cada rodada encontrou o que a correção anterior tinha introduzido. Na terceira, o
 auditor nomeou o padrão: **o defeito não está no item apontado — está no vizinho
-aritmético dele, ou no outro documento que o cita.** A história completa está em
-[`V-007`](docs/ia/registro-de-verificacao.md), e a conclusão é a única coisa desta
-entrega que eu levaria para qualquer projeto:
+aritmético dele, ou no outro documento que o cita.**
+
+As **transcrições das quatro rodadas** estão em
+[`docs/ia/transcricao/auditorias/`](docs/ia/transcricao/auditorias/), com os 110
+comandos que o auditor rodou **na íntegra** — é neles que se vê a verificação
+acontecendo, e não apenas a conclusão dela. A história em prosa está em
+[`V-007`](docs/ia/registro-de-verificacao.md), e a conclusão é a única coisa
+desta entrega que eu levaria para qualquer projeto:
 
 > O autor não consegue auditar o próprio texto contra o próprio código, porque lê
 > o texto e lembra da intenção em vez de ver o que ficou. O valor do subagente não
