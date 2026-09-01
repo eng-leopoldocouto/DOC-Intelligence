@@ -1,7 +1,7 @@
 # Carta de fechamento
 
 **DOC Intelligence — Trilha B (front-end)**
-Leopoldo Couto · 31 de agosto de 2026
+Leopoldo Couto · 1º de setembro de 2026
 Repositório: <https://github.com/eng-leopoldocouto/DOC-Intelligence>
 
 ---
@@ -65,7 +65,7 @@ primeira coisa que eu mudaria.
 
 ## Quanto tempo isso tudo levou
 
-**3h08 de trabalho efetivo**, somando a coluna de duração de
+**3h20 de trabalho efetivo**, somando a coluna de duração de
 `docs/ia/registro-de-tempo.md`. Começou às 19h17 de 31 de agosto de 2026 e
 terminou na madrugada do dia seguinte, com uma interrupção de cerca de duas
 horas por limite de uso da ferramenta, não contabilizada.
@@ -81,15 +81,24 @@ acabara de explicar por que isso é inaceitável. A segunda auditoria pegou.
 O conserto definitivo não foi um número melhor: foi tirar do arquivo a
 possibilidade de errar. A coluna "fim" da fase em andamento passou a dizer *"ver
 último commit"* — não se data prospectivamente um campo que aponta para o
-histórico. **Registrei as duas correções em vez de apagar os erros**, porque um
-documento que se apresenta como relógio real não pode conter estimativa
-disfarçada, e porque a segunda queda diz mais sobre como eu trabalho do que a
-primeira.
+histórico.
+
+**E caí uma terceira vez**, no mesmo arquivo: ao consertar a fase 8, mudei dois
+valores da coluna e repeti o total antigo no mesmo diff. A terceira auditoria
+pegou, e nomeou o padrão que eu não estava vendo: *o defeito não está no item
+apontado — está no vizinho aritmético dele, ou no outro documento que o cita.*
+Daí a regra que passei a seguir e que devia ter seguido desde o início:
+**procurar pelo número, não pelo assunto**. `grep` do número acha em quinze
+segundos o que reler o parágrafo não achou três vezes.
+
+Registrei as três correções em vez de apagar os erros. Um documento que se
+apresenta como relógio real não pode conter estimativa disfarçada — e as quedas
+sucessivas dizem mais sobre como eu trabalho do que a versão limpa diria.
 
 A distribuição diz mais que o total: **por volta de 40% do tempo foi spec, ADRs
 e registro de decisão, antes de existir uma linha de código.** A especificação
 inteira e as treze ADRs saíram em vinte e dois minutos de escrita; o plano de
-implementação, em vinte e um. Foi o melhor investimento da entrega — a fatia
+implementação, em dezoito. Foi o melhor investimento da entrega — a fatia
 vertical foi construída sem uma única decisão de arquitetura tomada no meio do
 código, e as **nove** divergências que apareceram estão registradas contra uma
 spec que ficou congelada numa tag desde antes do primeiro commit de
@@ -105,5 +114,8 @@ Se houver uma única coisa a levar desta entrega sobre trabalhar com agentes, é
 esta: **o autor não consegue auditar o próprio texto contra o próprio código**,
 porque lê o texto e lembra da intenção em vez de ver o que ficou. O valor do
 subagente auditor não foi capacidade técnica — foi não ter memória do que eu quis
-dizer. Rodei-o duas vezes; na segunda ele encontrou erros que a primeira rodada
-de correções tinha introduzido.
+dizer. Rodei-o **três vezes**, e as três encontraram algo: a segunda achou o que
+a primeira correção tinha introduzido, e a terceira, o que a segunda introduziu.
+O agente não erra por incompetência; erra por escopo de atenção — corrige com
+precisão o que foi apontado e não olha ao lado. **Eu também não. A diferença é
+que eu achava que estava olhando.**

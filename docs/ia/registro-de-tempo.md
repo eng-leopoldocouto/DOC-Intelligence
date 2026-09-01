@@ -22,7 +22,7 @@ Fuso: -03:00 (Mossoró/RN). Data de referência: 31/08/2026.
 | Fase 7 — carta de fechamento (T15) | 21:48 | 21:55 | 0h07 | 724 palavras, PDF em 2 páginas, Roboto 11 |
 | Fase 8 — auditoria e correções | 21:55 | ver último commit | ~0h50* | *duas rodadas de auditoria e as correções; exclui 2h de interrupção por limite de sessão |
 
-**Total: 3h08**, somando a coluna de duração. Início às 19h17 de 31/08/2026;
+**Total: 3h20**, somando a coluna de duração. Início às 19h17 de 31/08/2026;
 término na madrugada de 01/09/2026 — o horário exato é o do último commit, e
 não um número escrito aqui. Houve uma interrupção de cerca de duas horas por
 limite de uso da sessão, **não** contabilizada acima.
@@ -57,8 +57,23 @@ andamento passou a dizer *"ver último commit"*. Não é possível datar
 prospectivamente um campo que aponta para o histórico — o erro deixou de ser
 possível em vez de deixar de estar presente.
 
-Corrigi também a soma (3h08, não "aproximadamente 3h00") e a fase 1b, que
-declarava 0h21 num intervalo de 18 minutos.
+Corrigi também a fase 1b, que declarava 0h21 num intervalo de 18 minutos.
+
+## Terceira correção — a soma da própria correção saiu errada
+
+A segunda correção mudou dois valores da coluna (fase 1b de 0h21 para 0h18, fase
+8 de 0h35 para ~0h50) e, **no mesmo diff**, escreveu "Total: 3h08". 3h08 era a
+soma de *antes* das mudanças. A soma de agora é **3h20**.
+
+A terceira auditoria pegou. E nomeou o padrão que as três rodadas repetiram:
+
+> *o defeito não está no item apontado — está no vizinho aritmético do item
+> apontado, ou no outro documento que cita o item apontado.*
+
+Daí a regra de processo que passei a seguir e que devia ter seguido desde o
+começo: **procurar pelo número, não pelo assunto.** `grep -rn "3h08" docs/`
+teria pego isto em quinze segundos; reler o parágrafo, não pegou nenhuma das
+três vezes.
 
 Distribuição: cerca de 40% em especificação, ADRs, plano e registro — tudo
 escrito antes de existir uma linha de código.

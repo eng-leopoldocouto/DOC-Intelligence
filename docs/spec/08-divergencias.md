@@ -106,12 +106,21 @@ histórico, e não um esquecimento que ninguém notou.
 
 ## D-06 — Lista virtualizada: afirmada na spec, **não implementada**
 
-**A spec dizia**, em **três lugares**:
-- `05-fatos-do-ambiente.md` (fato e): *"Lista virtualizada e paginação por
-  cursor. O DOM não cresce com a fila"*, apontando `features/review/ListaVirtualizada.tsx`
-- `04-arquitetura.md`: a mesma promessa no fluxo da conferência
-- `07-nao-feito.md`: trata a lista virtualizada como **já existente e
-  reaproveitável** para a futura tela de busca
+**A spec dizia**, em **cinco lugares** — e dois deles são piores que os outros,
+porque não prometem: **afirmam verificação**.
+
+| Onde | O que diz |
+|---|---|
+| `05-fatos-do-ambiente.md:204` | *"Lista virtualizada e paginação por cursor. O DOM não cresce com a fila"*, apontando `features/review/ListaVirtualizada.tsx` |
+| `04-arquitetura.md:119` | a mesma promessa no fluxo da conferência |
+| `07-nao-feito.md:36` | trata a lista virtualizada como **já existente e reaproveitável** para a futura tela de busca |
+| `06-plano-de-testes.md:94` | **"Verificado à mão com fixture"** — afirma uma verificação que não ocorreu |
+| `01-requisitos.md` | **RF-06 marcado ✅**, com critério de aceite "o número de nós no DOM não cresce"; e **RNF-04** com verificação "Teste com fixture de 800" — `grep -rn "800" tests/` não devolve nada |
+
+As duas últimas são o achado dentro do achado. Prometer e não entregar é uma
+falha; **afirmar ter verificado o que não foi verificado é outra**, e mais grave,
+porque quem lê para de conferir. Foram encontradas pela terceira auditoria, depois
+que a segunda já havia corrigido esta mesma divergência "por completo".
 
 **O que foi feito:** só a metade. A **paginação por cursor existe**
 (`useFilaDeConferencia`, `useInfiniteQuery`, 50 por página) e é ela que evita

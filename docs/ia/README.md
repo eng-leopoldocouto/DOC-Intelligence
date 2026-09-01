@@ -6,7 +6,7 @@ Este diretório atende ao item **II.4** do enunciado.
 
 | Arquivo | Conteúdo |
 |---|---|
-| `prompts/` | Os prompts do candidato, íntegros, numerados e em ordem cronológica. Sem correção de digitação, sem reescrita posterior. |
+| `prompts/` | Todos os prompts do candidato, íntegros, numerados e em ordem cronológica. Sem correção de digitação, sem reescrita posterior. |
 | `registro-de-verificacao.md` | O que o agente produziu, o que foi conferido, onde errou, o que foi feito. Escrito no momento. |
 | `registro-de-tempo.md` | Relógio real por fase. |
 | `onde-o-agente-errou.md` | O parágrafo pedido pelo enunciado, em primeira pessoa, escrito a partir do registro de verificação. |
@@ -25,11 +25,19 @@ Declaro isto porque a mesma falha — horário escrito para a frente — aparece
 registro de tempo e foi apontada por auditoria. Seria incoerente corrigi-la lá e
 deixá-la aqui sem menção.
 
-**Sobre uma lacuna.** O prompt **0010 faltou** na primeira gravação: o comando
-que o criaria foi barrado por um hook de confirmação e eu não repeti a operação,
-de modo que a sequência pulou de 0009 para 0011. A ausência foi encontrada pela
-segunda auditoria. O arquivo foi recriado com a falha declarada no próprio
-cabeçalho, em vez de silenciada.
+**Sobre duas lacunas — o mesmo modo de falha, duas vezes.** Os prompts **0010** e
+**0012** faltaram na primeira gravação: em ambos os casos o comando que os criaria
+foi barrado por um hook de confirmação e a operação não foi repetida. O 0010 foi
+encontrado pela segunda auditoria; o 0012, pela terceira, que observou que "o
+registro de prompts continua parando um prompt antes do commit auditado".
+
+Os dois foram recriados com a falha declarada no próprio cabeçalho. **Recriar não
+é o mesmo que ter gravado no ato**, e por isso a lacuna fica escrita em vez de
+sumir: o enunciado pede os prompts "como foram escritos", e a honestidade sobre o
+processo de gravação faz parte disso.
+
+Que a mesma falha tenha ocorrido duas vezes é o dado interessante — na primeira
+vez tratei como acidente; foi padrão.
 
 ## Ferramentas de IA usadas
 

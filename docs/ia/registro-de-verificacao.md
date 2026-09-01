@@ -162,3 +162,48 @@ narrativa do repositório sobre si mesmo"* — e era eu quem estava acreditando 
 minha. Um autor não consegue auditar o próprio texto contra o próprio código,
 porque lê o texto e lembra da intenção em vez de ver o que ficou. **O valor do
 subagente não foi capacidade técnica: foi não ter memória do que eu quis dizer.**
+
+---
+
+## V-007 — 01/09/2026 · Três rodadas de auditoria, três vezes o mesmo padrão
+
+**O que o agente produziu:** rodei o auditor mais duas vezes. Segunda rodada:
+86/100, seis achados novos — **quatro deles criados pela correção da primeira**.
+Terceira: 85/100, oito achados, e desta vez ele nomeou o padrão.
+
+**O padrão:**
+
+> *o defeito não está no item apontado — está no vizinho aritmético do item
+> apontado, ou no outro documento que cita o item apontado.*
+
+Três exemplos, um por rodada:
+
+1. Corrigi as fases 6 e 7 do registro de tempo. **Errei a fase 8**, escrevendo um
+   término dezoito minutos à frente do commit — dentro do parágrafo que acabara
+   de explicar por que isso é inaceitável.
+2. Consertei a fase 8 estruturalmente. **Errei a soma**: mudei dois valores da
+   coluna e, no mesmo diff, repeti o total antigo (3h08 quando já era 3h20). O
+   número errado foi para a carta e para o PDF, numa frase que manda o avaliador
+   conferir o arquivo.
+3. Registrei a divergência da lista virtualizada citando três lugares. **Eram
+   cinco** — e os dois que faltavam eram justamente os que afirmavam *ter
+   verificado*.
+
+**O que fiz:** além de corrigir, mudei o método. Passei a **procurar pelo número,
+não pelo assunto**. `grep -rn "3h08" docs/` teria pego o segundo caso em quinze
+segundos; reler o parágrafo não pegou nenhuma das três vezes. E a carta passou a
+ser o **último** artefato regerado, nunca o primeiro — nas duas primeiras rodadas
+o PDF saiu antes de o repositório estabilizar, e por isso foi o único lugar onde
+o erro sobreviveu.
+
+**O que isto diz sobre trabalhar com agentes, e é a conclusão da entrega:** o
+agente não erra por incompetência, erra por **escopo de atenção**. Ele corrige o
+que foi apontado, com precisão, e não olha ao lado. Eu também não — a diferença é
+que eu achava que estava olhando. Foram necessárias três passagens de um leitor
+sem memória da minha intenção para que a contabilidade da entrega ficasse de pé.
+
+**Ressalva honesta sobre este próprio arquivo:** a auditoria apontou que a
+correção anterior não o atualizou, violando a regra 6 do `CLAUDE.md` — a que diz
+que estes registros "não podem ser reconstruídos no fim". Ela tinha razão. Esta
+entrada foi escrita depois dos fatos que descreve, e não no momento deles. Fica
+declarado.
