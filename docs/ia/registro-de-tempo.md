@@ -18,7 +18,12 @@ Fuso: -03:00 (Mossoró/RN). Data de referência: 31/08/2026.
 | Fase 4 — domínio, rede e mock (T2-T5) | 20:41 | 20:55 | 0h14 | 37 testes; mock MSW em 3 consumidores |
 | Fase 5a — envio e acompanhamento (T7-T8) | 21:00 | 21:08 | 0h08 | 54 testes; verificado no navegador |
 | Fase 5b — conferência (T9-T13) | 21:12 | 21:47 | 0h48 | 64 testes; T-01 e T-03 verificados no navegador |
-| Fase 7 — README e auditor (T14, T16) | — | — | — | |
-| Fase 8 — auditoria | — | — | — | |
+| Fase 6 — README e agente auditor (T14, T16) | 22:00 | 22:10 | 0h10 | README com roteiro; auditor autorado |
+| Fase 7 — carta de fechamento (T15) | 22:10 | 22:25 | 0h15 | 724 palavras, PDF em 2 páginas, Roboto 11 |
+| Fase 8 — auditoria final | 22:25 | — | — | |
 
-**Total acumulado:** preencher ao final.
+**Total acumulado: aproximadamente 3h05**, das 19h17 às 22h25 de 31/08/2026,
+em sessão contínua.
+
+Distribuição: cerca de 40% em especificação, ADRs, plano e registro — tudo
+escrito antes de existir uma linha de código.
