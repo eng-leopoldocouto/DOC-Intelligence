@@ -1,14 +1,79 @@
 # DOC Intelligence — interface do atendimento
 
-Serviço de inteligência documental do escritório LAMARCK. Documentos chegam por
-WhatsApp, e-mail e balcão; um modelo multimodal classifica e extrai campos;
-quando a máquina não tem confiança, uma pessoa confere.
+**Trilha B (front-end)** · Questão prático-subjetiva LAMARCK · Leopoldo Couto
 
-**Trilha B — front-end.** Esta entrega é a interface do atendimento **e o
-contrato da API**, que ainda não existe e é servido por mock.
+Serviço de inteligência documental para um escritório de advocacia. Documentos
+chegam por WhatsApp, e-mail e balcão; um modelo multimodal classifica e extrai
+campos; quando a máquina não tem confiança, uma pessoa confere.
 
-> **Leia primeiro:** [o que NÃO foi feito](docs/spec/07-nao-feito.md).
-> É a parte da entrega que mais diz sobre as decisões tomadas.
+Esta entrega é **a interface do atendimento e o contrato da API** — que ainda não
+existe, é meu para definir, e é servido por mock.
+
+---
+
+## Para quem vai avaliar: cinco minutos
+
+> O enunciado diz que o que se mede é *"o quanto conseguimos entender, lendo o
+> que você entregou, como você pensa"*. Este bloco é o caminho mais curto para
+> isso, e cada afirmação abaixo é **verificável por comando**, não por
+> confiança.
+
+### 1. Leia o que **não** foi feito — 2 min
+
+**[`docs/spec/07-nao-feito.md`](docs/spec/07-nao-feito.md)**
+
+O enunciado diz "queremos ler sobretudo o que você não fez". Está lá, com custo
+estimado e **gatilho de retomada** para cada item — porque "não fiz" sem
+estimativa é opinião.
+
+### 2. Veja como os sete fatos do ambiente foram tratados — 2 min
+
+**[`docs/spec/05-fatos-do-ambiente.md`](docs/spec/05-fatos-do-ambiente.md)**
+
+Sete fatos, cada um com a consequência que enxerguei, a decisão tomada, onde ela
+vive no código e o **risco residual**. Três foram resolvidos, quatro foram
+tratados *e* deixaram risco registrado. Nenhum ficou sem resposta.
+
+### 3. Confira que o texto corresponde ao código — 1 min
+
+A entrega inteira se apoia na afirmação de que o front-end não conhece nenhum
+tipo de documento. **Não acredite; rode:**
+
+```bash
+npm test                    # 64 testes, inclusive as guardas de arquitetura
+git show spec-v1 --stat     # a spec, congelada ANTES do primeiro commit de código
+npm run gen:api             # regenera os tipos do OpenAPI: o diff sai vazio
+```
+
+---
+
+## Onde cada critério de pontuação foi respondido
+
+| Peso | Critério | Onde ler |
+|---|---|---|
+| **30%** | Arquitetura e modularidade — *"o que acontece quando uma peça precisa ser trocada"* | [`04-arquitetura.md`](docs/spec/04-arquitetura.md): **seis costuras nomeadas**, cada uma com o custo real da troca. A resposta central: adicionar um tipo de documento novo custa **zero linhas de front-end** ([ADR-008](docs/adr/008-campos-dirigidos-por-schema.md)) |
+| **20%** | Rastreabilidade das decisões | [`docs/adr/`](docs/adr/) — 13 decisões, cada uma com as alternativas descartadas **pelo motivo real** e uma seção *"como saberemos que erramos"*. Decisão sem critério de refutação é preferência pessoal com aparência de engenharia |
+| **20%** | Uso de IA como ferramenta de engenharia | [`docs/ia/`](docs/ia/) — prompts íntegros, **registro de verificação com sete entradas**, transcrição completa da sessão, e o parágrafo sobre [onde o agente errou](docs/ia/onde-o-agente-errou.md). O ciclo de auditoria está em [`V-007`](docs/ia/registro-de-verificacao.md) |
+| **15%** | Especificação e método | [`docs/spec/`](docs/spec/) congelada na tag `spec-v1`, 28 minutos antes do primeiro arquivo em `src/`. As **nove divergências** posteriores estão em [`08-divergencias.md`](docs/spec/08-divergencias.md) |
+| **15%** | Atenção e proatividade | [`05-fatos-do-ambiente.md`](docs/spec/05-fatos-do-ambiente.md) e as **seis premissas** que assumi no lugar das dúvidas que não houve tempo de enviar ([`00-visao-e-escopo.md`](docs/spec/00-visao-e-escopo.md)) |
+
+---
+
+## O que roda
+
+Fatia vertical implementada:
+
+```
+envio em lote → acompanhamento → fila de conferência → correção de campo → gravação
+```
+
+| # | Comportamento do produto | Estado |
+|---|---|---|
+| 1 | Receber documento (imagem ou PDF) | **implementado** |
+| 2 | Descobrir o tipo, extrair campos, propor nome | **implementado** (extração é do mock) |
+| 3 | Consultar resultado e listar processados | **parcial** — acompanhamento sim, busca não |
+| 4 | Portão de confiança e conferência humana | **implementado** |
+| 5 | Ser consumido por sistemas internos | **contrato definido e servido** |
 
 ---
 
@@ -20,59 +85,61 @@ cp .env.example .env
 npm run dev
 ```
 
-Abre em <http://localhost:5173> com o mock ligado. O catálogo já vem semeado com
-dez documentos, seis deles aguardando conferência — sem isso a tela principal
-não teria o que mostrar.
-
-### Outros comandos
+Abre em <http://localhost:5173> com o mock ligado e a base semeada com dez
+documentos — seis aguardando conferência, um `FALHOU` e um `EXPIRADO`, para que
+os dois modos de falha do fato (a) apareçam sem depender de sorte.
 
 | Comando | O que faz |
 |---|---|
-| `npm test` | 64 testes |
+| `npm test` | 64 testes, incluindo as guardas de arquitetura |
 | `npm run typecheck` | TypeScript estrito (não há `lint` — ver [D-08](docs/spec/08-divergencias.md)) |
 | `npm run build` | Build de produção |
 | `npm run mock` | Serve o contrato em `http://localhost:8787/api/v1` |
 | `npm run gen:api` | Regenera os tipos a partir de `docs/spec/openapi.yaml` |
-| `npm run fixtures` | Regera os documentos fictícios (requer Python e Pillow) |
+| `npm run fixtures` | Regera os documentos fictícios (Python + Pillow) |
 
-O contrato pode ser exercitado por fora, sem a interface:
+O contrato pode ser exercitado sem a interface:
 
 ```bash
+npm run mock
 curl -s http://localhost:8787/api/v1/tipos-documento
 ```
 
 ---
 
-## Roteiro de demonstração
+## Roteiro de demonstração — cada passo prova um fato do ambiente
 
-Os documentos fictícios estão em `fixtures/documentos-ficticios/`. Nenhum dado
-real de pessoa — todos gerados por script, com marca d'água.
+Os documentos estão em `fixtures/documentos-ficticios/`. Nenhum dado real de
+pessoa: todos gerados por script, com marca d'água, CPF `000.000.000-00`
+(inválido pelo dígito verificador).
 
-1. **Envio.** Arraste os **seis** arquivos de uma vez. Cinco sobem; a
-   `copia de WhatsApp Image...` é barrada como duplicata **antes de qualquer
-   requisição** — o hash do conteúdo é calculado no cliente.
-2. **Reenvie os mesmos arquivos.** Agora a resposta vem do servidor:
-   *"já enviado em ..."*, sem disparar processamento novo. São as duas camadas
-   de deduplicação.
-3. **Acompanhamento.** A latência é sorteada entre 5 e 40 s e cerca de 8% falham.
-   Um documento em `FALHOU` oferece **Reprocessar**, com confirmação que informa
-   o custo.
-4. **Conferência.** O primeiro da fila é uma foto **torta** — gire e amplie. Os
-   campos vêm do schema da API, cada um com sua confiança.
-5. **Conflito (o mais importante).** Abra o mesmo documento em duas abas, salve
-   na primeira e depois tente salvar na segunda.
+| # | O que fazer | O que observar | Fato |
+|---|---|---|---|
+| 1 | Arraste os **seis** arquivos de uma vez | Cinco sobem; `copia de WhatsApp Image…` é barrada **antes de qualquer requisição** — o hash é calculado no cliente | (c), (a) |
+| 2 | **Reenvie os mesmos arquivos** | Agora quem barra é o servidor: *"já enviado em…"*, sem disparar processamento novo. São as duas camadas de deduplicação | (c) |
+| 3 | Vá ao Acompanhamento | Latência sorteada de 5 a 40 s, ~8% falham. **Tempo decorrido, nunca barra de progresso** — não sabemos a porcentagem e não vamos inventá-la | (a) |
+| 4 | Clique em **Reprocessar** num que falhou | Exige confirmação **que informa o custo**. Nada reprocessa sozinho | (a) |
+| 5 | Abra a Conferência | O primeiro da fila é uma foto **torta** — gire e amplie. Os campos vêm do schema da API, cada um com sua confiança individual | (b), (f) |
+| 6 | Note o CPF na lista × na conferência | Mascarado na listagem (onde é contexto), inteiro na conferência (onde é o trabalho) | (d) |
+| 7 | **Abra o mesmo documento em duas abas.** Salve na primeira; tente salvar na segunda | O diálogo **nomeia quem alterou**, mostra os campos divergentes lado a lado, e não descarta nem sobrescreve nada | (g) |
+
+O passo 7 é o mais importante da entrega. Sem ele, a correção de uma pessoa
+desaparece em silêncio e o dado errado segue para a planilha e para o processo.
 
 ---
 
-## Como está organizado
+## Como o repositório está organizado
 
 ```
-docs/spec/     a especificação, escrita ANTES do código      ← tag spec-v1
-docs/adr/      13 decisões, com as alternativas descartadas
-docs/plano/    o plano de implementação em 16 tarefas
-docs/ia/       prompts íntegros, verificações e tempo real
-fixtures/      documentos fictícios e como regerá-los
-src/           a fatia vertical
+docs/spec/       a especificação, escrita ANTES do código      ← tag spec-v1
+docs/adr/        13 decisões, com as alternativas descartadas
+docs/plano/      o plano de implementação em 16 tarefas
+docs/ia/         prompts, verificações, tempo real, transcrição da sessão
+docs/enunciado.md
+fixtures/        documentos fictícios e como regerá-los
+src/             a fatia vertical
+tests/           64 testes, incluindo guardas de arquitetura
+.claude/agents/  o subagente auditor, autorado para esta prova
 ```
 
 ```
@@ -85,24 +152,11 @@ src/
     api/      ÚNICA costura de rede + tipos gerados do OpenAPI
     lib/      hash, imagem/EXIF, máscara, formatação
     ui/       estilos
-  mocks/      handlers MSW — navegador, testes e HTTP
+  mocks/      handlers MSW — navegador, testes e HTTP, um só conjunto
 ```
 
-Regra de dependência `app → pages → features → entities → shared`, **verificada
-por teste** em `tests/arquitetura/`.
-
----
-
-## Por onde começar a ler
-
-| Se você quer saber… | Leia |
-|---|---|
-| o que ficou de fora e por quê | [`07-nao-feito.md`](docs/spec/07-nao-feito.md) |
-| como cada fato do ambiente foi tratado | [`05-fatos-do-ambiente.md`](docs/spec/05-fatos-do-ambiente.md) |
-| o que acontece quando uma peça é trocada | [`04-arquitetura.md`](docs/spec/04-arquitetura.md) |
-| por que cada decisão, e o que foi descartado | [`docs/adr/`](docs/adr/) |
-| onde a implementação divergiu da spec | [`08-divergencias.md`](docs/spec/08-divergencias.md) |
-| como a IA foi conduzida e onde errou | [`docs/ia/`](docs/ia/) |
+Regra de dependência `app → pages → features → entities → shared`,
+**verificada por teste** em [`tests/arquitetura/`](tests/arquitetura/fronteiras.test.ts).
 
 ---
 
@@ -115,33 +169,79 @@ dado errado numa planilha e reaparece semanas depois dentro de um processo. Por
 isso o teste mais importante da entrega verifica quatro coisas ao mesmo tempo no
 conflito de gravação: que o sistema avisa, que **nomeia quem** alterou, que não
 descarta a edição de quem chegou depois e que não sobrescreve a de quem chegou
-antes. Pela mesma lógica testei o que **não deve acontecer** — duplicata não
-vira segunda chamada paga, falha não reprocessa sozinha —, porque efeito
-colateral ausente só se garante contando as chamadas que não foram feitas. Um
-teste renderiza um tipo de documento que o front-end nunca viu, e é ele que
-sustenta a promessa central da arquitetura: se falhar, a especificação inteira é
-conversa fiada. E cinco testes de arquitetura verificam por máquina as regras
-que, escritas apenas no `CLAUDE.md`, seriam sugestões. Deixei de fora
-deliberadamente aparência e decodificação de imagem com EXIF: em jsdom eles
-passariam sem provar nada, e teste que passa sem provar nada é pior que teste
-ausente, porque dá falsa segurança.
+antes. Pela mesma lógica testei o que **não deve acontecer**: que a duplicata não
+gere um segundo documento, e que rejeitar não dispare reprocessamento — este
+último contando as chamadas que *não* foram feitas, porque efeito colateral
+ausente não se prova de outro jeito. Um teste renderiza um tipo de documento que
+o front-end nunca viu, e é ele que sustenta a promessa central da arquitetura: se
+falhar, a especificação inteira é conversa fiada. E cinco testes de arquitetura
+verificam por máquina as regras que, escritas apenas no `CLAUDE.md`, seriam
+sugestões. Deixei de fora deliberadamente aparência e decodificação de imagem com
+EXIF: em jsdom eles passariam sem provar nada, e teste que passa sem provar nada
+é pior que teste ausente, porque dá falsa segurança.
 
 ---
 
-## Limitações conhecidas desta demonstração
+## Sobre o uso de IA — item II.4
 
-- **O estado do mock vive em memória.** Recarregar a página zera o que você
-  enviou e restaura os dez documentos semeados. Ele é um dublê, não um banco.
+Trabalhei com **Claude Opus 5** em sessão interativa. O registro completo está em
+[`docs/ia/`](docs/ia/):
+
+| Arquivo | O que é |
+|---|---|
+| [`prompts/`](docs/ia/prompts/) | Os 12 prompts, íntegros e em ordem. **Erros de digitação preservados** — o enunciado pede "como foram escritos" |
+| [`registro-de-verificacao.md`](docs/ia/registro-de-verificacao.md) | Sete entradas: o que o agente produziu, o que conferi, onde errou, o que fiz |
+| [`onde-o-agente-errou.md`](docs/ia/onde-o-agente-errou.md) | O parágrafo em primeira pessoa exigido pelo enunciado |
+| [`registro-de-tempo.md`](docs/ia/registro-de-tempo.md) | Relógio real por fase, **com três correções registradas em vez de apagadas** |
+| [`transcricao/`](docs/ia/transcricao/) | A sessão inteira, gerada por script a partir do log local. Não editada à mão |
+
+**A fronteira do que é meu:** o `CLAUDE.md` e o subagente auditor foram autorados
+para esta prova. Os plugins Superpowers e ECC já estavam instalados no ambiente e
+são ferramenta, como o editor — a distinção está declarada em
+[`docs/ia/README.md`](docs/ia/README.md), porque reivindicar plugin de terceiro
+como trabalho próprio seria desonesto.
+
+### O ciclo que mais rendeu
+
+Ao final, pus um **subagente auditor** para conferir a entrega contra o enunciado,
+em contexto frio, com uma instrução no centro: *não acreditar na narrativa do
+repositório sobre si mesmo*. Rodei três vezes.
+
+Cada rodada encontrou o que a correção anterior tinha introduzido. Na terceira, o
+auditor nomeou o padrão: **o defeito não está no item apontado — está no vizinho
+aritmético dele, ou no outro documento que o cita.** A história completa está em
+[`V-007`](docs/ia/registro-de-verificacao.md), e a conclusão é a única coisa desta
+entrega que eu levaria para qualquer projeto:
+
+> O autor não consegue auditar o próprio texto contra o próprio código, porque lê
+> o texto e lembra da intenção em vez de ver o que ficou. O valor do subagente não
+> foi capacidade técnica — foi **não ter memória do que eu quis dizer**.
+
+---
+
+## Limitações conhecidas
+
+Declaradas aqui porque escondê-las seria o oposto do que os documentos deste
+repositório afirmam praticar.
+
+- **O estado do mock vive em memória.** Recarregar zera o que você enviou e
+  restaura os dez documentos semeados. Ele é um dublê, não um banco.
 - **Sem autenticação.** A identidade vem do host interno por cabeçalho
-  ([ADR-011](docs/adr/011-identidade-delegada-ao-host.md)); em desenvolvimento
-  ela sai do `.env`. Apague `VITE_USUARIO_ID` para ver a degradação anônima.
-- **Sem busca.** Projetada e servida pelo mock, sem tela — decisão registrada
-  em [`07-nao-feito.md`](docs/spec/07-nao-feito.md).
-- **A fila pagina por cursor, mas não é virtualizada.** A spec prometia as duas
-  coisas; só a primeira foi feita. Omissão, não decisão — registrada como
-  [D-06](docs/spec/08-divergencias.md).
-- **Sem bloqueio de sessão por inatividade** na conferência, também prometido na
-  spec ([D-07](docs/spec/08-divergencias.md)). A reserva expira em 5 minutos, o
-  que limita a janela, mas não fecha.
-- **HEIC do iPhone é recusado**, com instrução de como contornar. Risco
-  conhecido e não resolvido.
+  ([ADR-011](docs/adr/011-identidade-delegada-ao-host.md)). Apague
+  `VITE_USUARIO_ID` do `.env` para ver a degradação anônima funcionando.
+- **Sem busca.** Projetada e servida pelo mock, sem tela
+  ([`07-nao-feito.md`](docs/spec/07-nao-feito.md)).
+- **A fila pagina por cursor, mas não é virtualizada** — a spec prometia as duas
+  coisas ([D-06](docs/spec/08-divergencias.md)).
+- **Sem bloqueio por inatividade** na conferência ([D-07](docs/spec/08-divergencias.md)).
+- **Sem CI** — as guardas de arquitetura rodam em `npm test`, não no build
+  ([D-09](docs/spec/08-divergencias.md)).
+- **HEIC do iPhone é recusado**, com instrução de como contornar. Risco conhecido
+  e não resolvido.
+
+---
+
+## Carta de fechamento
+
+[`docs/carta-de-fechamento.pdf`](docs/carta-de-fechamento.pdf) — duas páginas,
+respondendo às quatro perguntas do enunciado.

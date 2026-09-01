@@ -10,6 +10,7 @@ Este diretório atende ao item **II.4** do enunciado.
 | `registro-de-verificacao.md` | O que o agente produziu, o que foi conferido, onde errou, o que foi feito. Escrito no momento. |
 | `registro-de-tempo.md` | Relógio real por fase. |
 | `onde-o-agente-errou.md` | O parágrafo pedido pelo enunciado, em primeira pessoa, escrito a partir do registro de verificação. |
+| `transcricao/` | A sessão inteira — o diálogo dos dois lados —, gerada por `scripts/exportar-sessao.py` a partir do log local do Claude Code. **Não editada à mão.** |
 
 ## Duas ressalvas sobre este diretório
 
