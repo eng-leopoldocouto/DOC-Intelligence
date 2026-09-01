@@ -17,8 +17,8 @@ Fuso: -03:00 (Mossoró/RN). Data de referência: 31/08/2026.
 | Fase 3 — documentos fictícios (T6) | 20:55 | 21:00 | 0h05 | 6 arquivos, marca d'água, cópia byte a byte |
 | Fase 4 — domínio, rede e mock (T2-T5) | 20:41 | 20:55 | 0h14 | 37 testes; mock MSW em 3 consumidores |
 | Fase 5a — envio e acompanhamento (T7-T8) | 21:00 | 21:08 | 0h08 | 54 testes; verificado no navegador |
-| Fase 6 — testes | — | — | — | |
-| Fase 7 — README, registro de IA, carta | — | — | — | |
+| Fase 5b — conferência (T9-T13) | 21:12 | 21:47 | 0h48 | 64 testes; T-01 e T-03 verificados no navegador |
+| Fase 7 — README e auditor (T14, T16) | — | — | — | |
 | Fase 8 — auditoria | — | — | — | |
 
 **Total acumulado:** preencher ao final.
