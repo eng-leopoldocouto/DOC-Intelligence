@@ -47,9 +47,22 @@ com `git log`.
 | 4a — leitura e registro do prompt | 09:13 | 09:16 | 0h03 | `c37136c` | o prompt vai íntegro **antes** de qualquer alteração (regra 6) |
 | 4b — Blocos 1 e 2: defeitos e fatos do ambiente | 09:16 | 09:39 | 0h23 | `4f88de3` | fronteira de erro, diálogo acessível, `aria-live`, 360 px, segundo portão, pressão da fila; ADR-014 e ADR-015; +17 testes |
 | 4c — Bloco 3: artefatos | 09:39 | 10:48 | 1h09 | `78058bf` | CI, hook `PreToolUse`, oxlint, duas capturas, `exemplos.http` |
-| 4d — Bloco 4: auditoria, achados e fechamento | 10:48 | **ver último commit** | **≥0h39** | `7f18e73` e o que vier depois | quarta auditoria em contexto frio, dez achados, correções, gerador do PDF e o verificador de contagens |
+| 4d — Bloco 4: auditoria, achados e fechamento | 10:48 | 11:37 | 0h49 | `0a4d214` | quarta auditoria em contexto frio, dez achados, correções, gerador do PDF, verificador de contagens e o parágrafo do item II.4 |
+| 4e — integração | 11:37 | **ver último commit** | **≥0h05** | `01833aa` | merge do PR #1 e a **primeira execução real da CI** |
 
-**Total: 3h20 + 1h35 fechadas nesta sessão + a fase 4d = ≥5h34.**
+**Total: 3h20 na primeira sessão + 2h24 fechadas nesta + a fase 4e = ≥5h49.**
+
+### A CI deixou de ser um arquivo YAML
+
+Na fase 4e ela **rodou de verdade**, três vezes: no push da branch, no *pull
+request* e no `main` depois do merge. Os sete passos passaram no runner Linux,
+inclusive os dois que existem para provar afirmação de texto — os tipos gerados
+não derivam do contrato, e nenhum número do README é desmentido pelo repositório.
+
+Registro isto porque a D-09 foi declarada fechada **antes** de a CI ter rodado
+uma única vez. Era, naquele momento, exatamente o tipo de afirmação que este
+repositório passou quatro auditorias aprendendo a não fazer. Agora tem lastro, e
+o selo no topo do README aponta para a execução.
 
 ### Por que "≥", e não um número redondo
 

@@ -83,9 +83,9 @@ passou a ter uma tela dedicada a informar a perda.
 
 ## Quanto tempo isso tudo levou
 
-**Pelo menos 5h34 de trabalho efetivo**, somando a coluna de duração de
-`docs/ia/registro-de-tempo.md`: 3h20 na noite de 31 de agosto, mais 1h35 já
-fechadas na manhã seguinte, mais a fase de fechamento em curso. Houve uma
+**Pelo menos 5h49 de trabalho efetivo**, somando a coluna de duração de
+`docs/ia/registro-de-tempo.md`: 3h20 na noite de 31 de agosto, mais 2h24 já
+fechadas na manhã seguinte, mais a fase de integração em curso. Houve uma
 interrupção de cerca de duas horas por limite de uso da ferramenta, não
 contabilizada.
 
