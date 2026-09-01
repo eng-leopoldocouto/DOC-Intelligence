@@ -332,3 +332,73 @@ export const registrarAlteracao = (id: string, quem: string | null) => {
   const d = documentos.get(id)
   if (d) d._alteradoPor = quem
 }
+
+// ---------------------------------------------------------------------------
+// Semeadura para demonstração
+// ---------------------------------------------------------------------------
+
+/**
+ * O estado do mock vive em memória e se perde a cada recarga da página — ele é
+ * um dublê, não um banco. Sem semeadura, quem abre o projeto pela primeira vez
+ * encontra a fila de conferência vazia e não tem o que conferir.
+ *
+ * Semeamos apenas no NAVEGADOR. Os testes precisam de estado limpo e
+ * determinístico, e chamam `limpar()` a cada caso.
+ */
+export function semear(): void {
+  if (documentos.size > 0) return
+
+  const minutosAtras = (m: number) => new Date(Date.now() - m * 60_000).toISOString()
+
+  const receitas: { tipoId: string; nomeOrigem: string; destino: EstadoDocumento; minutos: number }[] = [
+    { tipoId: 'rg', nomeOrigem: 'WhatsApp Image 2026-08-11 at 09.03.12.jpeg', destino: 'AGUARDANDO_CONFERENCIA', minutos: 55 },
+    { tipoId: 'contracheque', nomeOrigem: 'scan0007.pdf', destino: 'AGUARDANDO_CONFERENCIA', minutos: 48 },
+    { tipoId: 'comprovante-residencia', nomeOrigem: 'IMG_20260811_091802.jpg', destino: 'AGUARDANDO_CONFERENCIA', minutos: 41 },
+    { tipoId: 'procuracao', nomeOrigem: 'WhatsApp Image 2026-08-11 at 09.22.40.jpeg', destino: 'AGUARDANDO_CONFERENCIA', minutos: 33 },
+    { tipoId: 'rg', nomeOrigem: 'scan0011.pdf', destino: 'AGUARDANDO_CONFERENCIA', minutos: 27 },
+    { tipoId: 'contracheque', nomeOrigem: 'IMG_20260811_094410.jpg', destino: 'AGUARDANDO_CONFERENCIA', minutos: 19 },
+    { tipoId: 'rg', nomeOrigem: 'WhatsApp Image 2026-08-11 at 08.51.07.jpeg', destino: 'PRONTO', minutos: 62 },
+    { tipoId: 'comprovante-residencia', nomeOrigem: 'scan0003.pdf', destino: 'PRONTO', minutos: 58 },
+    // Os dois modos de falha do fato (a), para que ambos apareçam na demonstração.
+    { tipoId: 'rg', nomeOrigem: 'IMG_20260811_090110.jpg', destino: 'FALHOU', minutos: 36 },
+    { tipoId: 'contracheque', nomeOrigem: 'scan0009.pdf', destino: 'EXPIRADO', minutos: 24 },
+  ]
+
+  for (const r of receitas) {
+    const tipo = CATALOGO.find((t) => t.id === r.tipoId)!
+    const limiar = tipo.limiarConfianca ?? config.limiarConfianca
+    const falha = r.destino === 'FALHOU' || r.destino === 'EXPIRADO'
+
+    const doc: DocumentoInterno = {
+      id: `doc-${++sequencia}`,
+      // Hash de semeadura: determinístico e claramente sintético, para não
+      // colidir com nada que a pessoa envie de verdade.
+      contentHash: `${sequencia}`.padStart(2, '0').repeat(32).slice(0, 64),
+      nomeOrigem: r.nomeOrigem,
+      nomePadronizado: null,
+      tipoDocumentoId: falha ? null : tipo.id,
+      estado: 'RECEBIDO',
+      confianca: null,
+      campos: [],
+      versao: 1,
+      recebidoEm: minutosAtras(r.minutos),
+      motivoFalha: null,
+      _latenciaMs: 0,
+      _destino: r.destino,
+      _camposFinais: falha ? [] : VALORES[tipo.id]!().map((c) => ({
+        ...c,
+        // Confiança coerente com o destino, para o portão de confiança ficar
+        // visível na tela em vez de depender de sorte.
+        confianca: r.destino === 'AGUARDANDO_CONFERENCIA'
+          ? entre(0.4, limiar - 0.02)
+          : entre(limiar, 0.99),
+      })),
+      _confiancaFinal: falha ? null : r.destino === 'AGUARDANDO_CONFERENCIA'
+        ? entre(0.5, limiar - 0.01)
+        : entre(limiar, 0.99),
+    }
+    documentos.set(doc.id, doc)
+    porHash.set(doc.contentHash, doc.id)
+    materializar(doc)
+  }
+}
