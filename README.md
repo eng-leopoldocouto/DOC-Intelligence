@@ -29,7 +29,7 @@ não teria o que mostrar.
 | Comando | O que faz |
 |---|---|
 | `npm test` | 64 testes |
-| `npm run typecheck` | TypeScript estrito |
+| `npm run typecheck` | TypeScript estrito (não há `lint` — ver [D-08](docs/spec/08-divergencias.md)) |
 | `npm run build` | Build de produção |
 | `npm run mock` | Serve o contrato em `http://localhost:8787/api/v1` |
 | `npm run gen:api` | Regenera os tipos a partir de `docs/spec/openapi.yaml` |
@@ -108,9 +108,6 @@ por teste** em `tests/arquitetura/`.
 
 ## O que escolhi testar, e por quê
 
-> *(rascunho a partir de [`06-plano-de-testes.md`](docs/spec/06-plano-de-testes.md) —
-> a redigir na primeira pessoa do candidato antes do envio)*
-
 São 64 testes, e o critério para escrevê-los não foi cobertura: foi **o que
 quebraria em silêncio**. Um botão que some é descoberto em cinco minutos de uso;
 uma correção de campo sobrescrita por outra pessoa não é descoberta nunca — vira
@@ -125,9 +122,9 @@ teste renderiza um tipo de documento que o front-end nunca viu, e é ele que
 sustenta a promessa central da arquitetura: se falhar, a especificação inteira é
 conversa fiada. E cinco testes de arquitetura verificam por máquina as regras
 que, escritas apenas no `CLAUDE.md`, seriam sugestões. Deixei de fora
-deliberadamente aparência, virtualização com 800 itens e decodificação de imagem
-com EXIF: em jsdom eles passariam sem provar nada, e teste que passa sem provar
-nada é pior que teste ausente, porque dá falsa segurança.
+deliberadamente aparência e decodificação de imagem com EXIF: em jsdom eles
+passariam sem provar nada, e teste que passa sem provar nada é pior que teste
+ausente, porque dá falsa segurança.
 
 ---
 
@@ -140,5 +137,11 @@ nada é pior que teste ausente, porque dá falsa segurança.
   ela sai do `.env`. Apague `VITE_USUARIO_ID` para ver a degradação anônima.
 - **Sem busca.** Projetada e servida pelo mock, sem tela — decisão registrada
   em [`07-nao-feito.md`](docs/spec/07-nao-feito.md).
+- **A fila pagina por cursor, mas não é virtualizada.** A spec prometia as duas
+  coisas; só a primeira foi feita. Omissão, não decisão — registrada como
+  [D-06](docs/spec/08-divergencias.md).
+- **Sem bloqueio de sessão por inatividade** na conferência, também prometido na
+  spec ([D-07](docs/spec/08-divergencias.md)). A reserva expira em 5 minutos, o
+  que limita a janela, mas não fecha.
 - **HEIC do iPhone é recusado**, com instrução de como contornar. Risco
   conhecido e não resolvido.

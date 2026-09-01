@@ -101,3 +101,68 @@ no contrato e é servido pelo mock; **não há rota nem tela**.
 
 **Registrado aqui** apenas para que a ausência seja uma decisão visível no
 histórico, e não um esquecimento que ninguém notou.
+
+---
+
+## D-06 — Lista virtualizada: afirmada na spec, **não implementada**
+
+**A spec dizia** (`05-fatos-do-ambiente.md`, fato (e)): *"Lista virtualizada e
+paginação por cursor. O DOM não cresce com a fila"*, apontando o caminho
+`features/review/ListaVirtualizada.tsx`.
+
+**O que foi feito:** só a metade. A **paginação por cursor existe**
+(`useFilaDeConferencia`, `useInfiniteQuery`, 50 por página) e é ela que evita
+trazer 800 documentos de uma vez. A **virtualização não existe**: a lista é um
+`itens.map(...)` e o DOM cresce à medida que se pede mais páginas.
+
+**Por quê:** não foi decisão — foi omissão. A paginação resolveu o problema
+visível na demonstração e eu segui adiante sem voltar.
+
+**Gravidade real:** com 50 itens por página o DOM fica pequeno; o problema só
+aparece se alguém pedir "carregar mais" muitas vezes seguidas. Não é o desastre
+que a ausência sugere, mas **é menos do que a spec prometeu**.
+
+**Veredito: o texto estava errado, não a spec.** A decisão de virtualizar
+continua certa; o que faltou foi executá-la. Custo estimado: 1 h com
+`@tanstack/react-virtual`.
+
+**Como isto foi descoberto:** pelo agente auditor, que buscou `virtualiz` em
+`src/` e encontrou zero ocorrências contra três afirmações no texto. É
+exatamente o tipo de divergência que este documento existe para expor — e ela
+tinha passado por mim.
+
+---
+
+## D-07 — Bloqueio de sessão por inatividade: afirmado, não implementado
+
+**A spec dizia** (`05-fatos-do-ambiente.md`, fato (d)): *"bloqueio de sessão por
+inatividade na tela de conferência, que é onde o documento fica aberto na tela
+enquanto a pessoa atende alguém no balcão"*.
+
+**O que foi feito:** nada. Não há temporizador de inatividade.
+
+**Atenuante honesto:** a reserva de conferência **expira em 5 minutos** e o
+documento volta à fila, o que limita a janela do problema — mas a imagem
+continua visível na tela de quem abriu.
+
+**Veredito:** omissão, não decisão. Custo: cerca de 40 min. Deveria ter sido
+declarado em `07-nao-feito.md` desde o início.
+
+---
+
+## D-08 — `npm run lint` não existe
+
+**A spec dizia** (`CLAUDE.md`, "definição de pronto", e o README): que
+`npm run lint` deve passar antes de considerar uma tarefa pronta.
+
+**O que foi feito:** ESLint nunca foi instalado. O script não existe, embora haja
+um `eslint-disable-line` em `PaginaConferencia.tsx`.
+
+**Por quê:** cortei a configuração do linter no scaffold para ganhar tempo e não
+voltei para ajustar a definição de pronto, que passou a exigir um comando
+inexistente.
+
+**Correção aplicada:** removi a exigência do `CLAUDE.md` e do README, em vez de
+instalar o ESLint às pressas no fim. **Uma regra que ninguém pode executar é pior
+que a ausência da regra** — ensina que a lista de verificação é decorativa. O
+`typecheck` estrito, esse sim, roda e é exigido.

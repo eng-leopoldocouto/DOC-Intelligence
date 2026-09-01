@@ -99,7 +99,7 @@ Uma tarefa está pronta quando:
 
 - [ ] O comportamento tem critério de aceite na spec (Given/When/Then)
 - [ ] Existe teste que falharia se o comportamento sumisse
-- [ ] `npm run typecheck` e `npm run lint` passam
+- [ ] `npm run typecheck` passa (não há linter neste projeto — ver D-08)
 - [ ] Nenhuma regra da seção 2 foi quebrada
 - [ ] Se divergiu da spec, a divergência está em `docs/spec/08-divergencias.md`
 

@@ -17,13 +17,29 @@ Fuso: -03:00 (Mossoró/RN). Data de referência: 31/08/2026.
 | Fase 3 — documentos fictícios (T6) | 20:55 | 21:00 | 0h05 | 6 arquivos, marca d'água, cópia byte a byte |
 | Fase 4 — domínio, rede e mock (T2-T5) | 20:41 | 20:55 | 0h14 | 37 testes; mock MSW em 3 consumidores |
 | Fase 5a — envio e acompanhamento (T7-T8) | 21:00 | 21:08 | 0h08 | 54 testes; verificado no navegador |
-| Fase 5b — conferência (T9-T13) | 21:12 | 21:47 | 0h48 | 64 testes; T-01 e T-03 verificados no navegador |
-| Fase 6 — README e agente auditor (T14, T16) | 22:00 | 22:10 | 0h10 | README com roteiro; auditor autorado |
-| Fase 7 — carta de fechamento (T15) | 22:10 | 22:25 | 0h15 | 724 palavras, PDF em 2 páginas, Roboto 11 |
-| Fase 8 — auditoria final | 22:25 | — | — | |
+| Fase 5b — conferência (T9-T13) | 21:12 | 21:41 | 0h29 | 64 testes; T-01 e T-03 verificados no navegador |
+| Fase 6 — README e agente auditor (T14, T16) | 21:41 | 21:48 | 0h07 | README com roteiro; auditor autorado |
+| Fase 7 — carta de fechamento (T15) | 21:48 | 21:55 | 0h07 | 724 palavras, PDF em 2 páginas, Roboto 11 |
+| Fase 8 — auditoria e correções | 21:55 | 00:45 | 0h35* | *inclui interrupção por limite de sessão; tempo efetivo |
 
-**Total acumulado: aproximadamente 3h05**, das 19h17 às 22h25 de 31/08/2026,
-em sessão contínua.
+**Total acumulado: aproximadamente 3h00**, das 19h17 de 31/08/2026 às 00h45 de
+01/09/2026, com uma interrupção por limite de uso da sessão entre 22h e 00h10.
+
+## Correção de 01/09/2026
+
+As linhas das fases 6 e 7 traziam **22:00–22:10** e **22:10–22:25**. Eram
+estimativas prospectivas: eu as escrevi *antes* de terminar as fases, e o commit
+que as gravou (`eafc56b`) tem carimbo de **21:54:31** — anterior ao horário que
+o próprio arquivo declarava como início.
+
+O agente auditor apontou a contradição comparando a tabela com
+`git log --diff-filter=A`. Substituí pelos horários reais de entrada dos
+arquivos: README e auditor às 21:47:52, carta às 21:54:31. Aproveitei para desfazer a
+sobreposição que a estimativa criara entre as fases 5b e 6.
+
+Registro a correção em vez de apagar o erro, porque um arquivo que se apresenta
+como "relógio real, carimbado no momento" não pode conter estimativa disfarçada —
+e a carta de fechamento se apoia nele.
 
 Distribuição: cerca de 40% em especificação, ADRs, plano e registro — tudo
 escrito antes de existir uma linha de código.

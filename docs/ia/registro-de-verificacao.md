@@ -119,3 +119,46 @@ passavam a carregar um catálogo sem o tipo dos seus próprios documentos.
 **O que fiz:** exigi `resetHandlers()` e `removeAllListeners()` no `afterEach`, e
 que a suíte fosse rodada **três vezes seguidas** antes de eu aceitar o resultado.
 Teste que passa uma vez não prova nada quando há sorteio envolvido.
+
+---
+
+## V-006 — 01/09/2026, 00:30 · O auditor achou o que eu não achei
+
+**O que o agente produziu:** o subagente auditor, rodando em contexto frio contra
+`docs/enunciado.md`, emitiu **APROVADO COM RESSALVAS** (~84/100) e listou três
+achados graves.
+
+**O que eu conferi:** não aceitei nenhum pela palavra dele. Rodei as buscas eu
+mesmo (`grep -rn "irtualiz" src/`, `git log --diff-filter=A`, `grep -n rascunho
+README.md`) antes de mudar qualquer linha. **Os três procedem.**
+
+**O que estava errado — e por que passou por mim:**
+
+1. **A lista virtualizada era afirmada em três lugares e não existia.** Eu
+   escrevi na spec "lista virtualizada e paginação por cursor", implementei só a
+   paginação, e o README passou a tratar as duas como feitas. É exatamente a
+   divergência entre texto e código que este repositório inteiro se propõe a não
+   ter — e eu não a vi porque **li o meu próprio texto como se fosse evidência**,
+   que é o erro contra o qual instruí o auditor.
+
+2. **O registro de tempo tinha três linhas datadas para o futuro.** A tabela
+   dizia "22:00–22:10" num commit carimbado às 21:54:31. Eram estimativas
+   prospectivas dentro de um arquivo que se apresenta como "relógio real,
+   carimbado no momento" — e a carta de fechamento se apoia nele. Este é o pior
+   dos três: não é omissão, é um documento afirmando um método que ele próprio
+   não seguiu.
+
+3. **O README entregava um marcador de rascunho** dentro do parágrafo que o item
+   II.3 exige, dizendo que o texto ainda seria redigido pelo candidato.
+
+**O que fiz:** corrigi os horários e **registrei a correção em vez de apagar o
+erro**; abri D-06, D-07 e D-08 em `08-divergencias.md`; assumi o parágrafo do
+README em primeira pessoa; fiz `npm run mock` semear a base (o README oferecia
+um `curl` que devolvia lista vazia); e derivei `MotivoRejeicao` do contrato, em
+vez de mantê-lo escrito à mão contra a minha própria regra 1.
+
+**O que aprendi, e é o ponto:** eu instruí o auditor a *"não acreditar na
+narrativa do repositório sobre si mesmo"* — e era eu quem estava acreditando na
+minha. Um autor não consegue auditar o próprio texto contra o próprio código,
+porque lê o texto e lembra da intenção em vez de ver o que ficou. **O valor do
+subagente não foi capacidade técnica: foi não ter memória do que eu quis dizer.**

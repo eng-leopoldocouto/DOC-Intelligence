@@ -11,14 +11,19 @@ import type {
   EstadoDocumento,
 } from '@/entities/documento/tipos'
 import type { CatalogoDeTipos } from '@/entities/tipo-documento/tipos'
+import type { paths } from './types.gen'
 import { http } from './http'
 
-export type MotivoRejeicao =
-  | 'ILEGIVEL'
-  | 'TIPO_INCORRETO'
-  | 'INCOMPLETO'
-  | 'NAO_E_DOCUMENTO'
-  | 'OUTRO'
+/**
+ * Derivado do contrato, não escrito à mão (G3, ADR-003).
+ *
+ * A primeira versão listava os cinco motivos literalmente aqui — o que violava
+ * a regra 1 do CLAUDE.md e criaria uma segunda fonte de verdade, capaz de
+ * divergir do OpenAPI em silêncio. Apontado pelo agente auditor.
+ */
+export type MotivoRejeicao = NonNullable<
+  paths['/documentos/{id}/rejeitar']['post']['requestBody']
+>['content']['application/json']['motivo']
 
 export const client = {
   /**
