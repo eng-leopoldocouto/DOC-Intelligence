@@ -65,9 +65,18 @@ primeira coisa que eu mudaria.
 
 ## Quanto tempo isso tudo levou
 
-**Cerca de três horas de trabalho contínuo**, em 31 de agosto de 2026, das 19h17
-às 22h. O tempo está carimbado por fase em `docs/ia/registro-de-tempo.md`, com
-relógio real, escrito no momento em vez de estimado depois.
+**Cerca de três horas de trabalho efetivo**, começando às 19h17 de 31 de agosto
+de 2026 e terminando às 00h45 do dia seguinte, com uma interrupção de duas horas
+por limite de uso da ferramenta. O tempo está carimbado por fase em
+`docs/ia/registro-de-tempo.md`.
+
+Devo uma ressalva sobre esse arquivo, porque ela é do mesmo tipo que a entrega
+inteira se propõe a não ter. Três linhas dele traziam horários **estimados para
+a frente** — o commit que as gravou é anterior ao horário que elas declaravam
+como início. Foi o agente auditor que apontou, comparando a tabela com o
+`git log`. Corrigi para os horários reais e **registrei a correção em vez de
+apagar o erro**: um documento que se apresenta como relógio real não pode conter
+estimativa disfarçada, ainda mais sendo esta a resposta que se apoia nele.
 
 A distribuição diz mais que o total: **por volta de 40% do tempo foi spec, ADRs
 e registro de decisão, antes de existir uma linha de código.** A especificação
