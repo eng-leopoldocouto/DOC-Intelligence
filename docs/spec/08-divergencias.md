@@ -166,3 +166,26 @@ inexistente.
 instalar o ESLint às pressas no fim. **Uma regra que ninguém pode executar é pior
 que a ausência da regra** — ensina que a lista de verificação é decorativa. O
 `typecheck` estrito, esse sim, roda e é exigido.
+
+---
+
+## D-09 — A guarda G1 não "falha o build"
+
+**A spec dizia** (ADR-008, e o plano na tarefa T13): que a varredura por tipo de
+documento hardcoded *"falha o build"*.
+
+**O que foi feito:** a guarda existe e funciona — `tests/arquitetura/fronteiras.test.ts`,
+seis asserções, todas passando. Mas ela roda em `npm test`, e `npm run build` é
+apenas `tsc -b && vite build`. **Não há CI.** Quem rodar só o build não vê a
+guarda.
+
+**Por quê:** escrevi "falha o build" pensando no pipeline que um projeto real
+teria, e entreguei um projeto sem pipeline.
+
+**Veredito: o texto prometeu mais do que a montagem entrega.** A correção certa
+é um workflow de CI rodando `typecheck` e `test` a cada push — cerca de 20 min,
+fora do prazo desta entrega.
+
+**Registro esta divergência** porque ela é da mesma classe das D-06 e D-07:
+afirmação de texto sem lastro no que está montado. Tendo corrigido aquelas
+depois da auditoria, deixar esta de pé seria incoerente.
