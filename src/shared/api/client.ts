@@ -66,8 +66,13 @@ export const client = {
   reservar: (id: string) =>
     http<Reserva>(`/documentos/${id}/conferencia/claim`, { metodo: 'POST' }),
 
-  liberar: (id: string) =>
-    http<void>(`/documentos/${id}/conferencia/claim`, { metodo: 'DELETE' }),
+  /**
+   * `keepalive` para que a liberação sobreviva ao fechamento da aba. Sem isso,
+   * a reserva só se soltaria pelo TTL, e o próximo conferente esperaria cinco
+   * minutos por um documento que ninguém está mais olhando.
+   */
+  liberar: (id: string, keepalive = false) =>
+    http<void>(`/documentos/${id}/conferencia/claim`, { metodo: 'DELETE', keepalive }),
 
   /**
    * Grava correções e conclui a conferência.

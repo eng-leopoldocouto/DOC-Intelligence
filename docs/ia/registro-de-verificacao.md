@@ -58,3 +58,64 @@ mudam a interface decidi pessoalmente (ver `prompts/0005`).
 ser cobrado sobre o item II.4. Ele não lê o enunciado procurando pontuação — ele
 lê procurando tarefa. Quem precisa manter o critério de avaliação em vista sou
 eu.
+
+---
+
+## V-003 — 31/08/2026, 20:52 · O agente escreveu um teste que sabia demais
+
+**O que o agente produziu:** um teste de contrato que assumia a existência de um
+campo chamado `nome` no documento.
+
+**Como percebi:** o teste falhou de forma intermitente. Como o mock sorteia o
+tipo do documento, ele quebrava quando saía comprovante de residência, que tem
+`titular` em vez de `nome`.
+
+**O que estava errado:** o teste cometia, no teste, exatamente o pecado que a
+ADR-008 proíbe no front-end — saber de antemão o que a API vai devolver.
+
+**O que fiz:** corrigi o **teste**, não o código. Ele passou a pegar a primeira
+chave do schema recebido, sem conhecer nome de campo algum.
+
+**O agente repetiu o mesmo erro depois**, na tela de conferência, usando
+`findByLabelText(/Nome/i)`. Que voltasse a acontecer é o dado interessante: o
+agente aplica o princípio no código de produção, onde a regra está escrita no
+`CLAUDE.md`, mas não o transporta sozinho para o código de teste. **A regra
+precisava valer para os dois, e eu é que precisei notar isso.**
+
+---
+
+## V-004 — 31/08/2026, 21:41 · Falso positivo no teste de arquitetura
+
+**O que o agente produziu:** o teste que varre `src/` procurando nome de tipo de
+documento acusou dois arquivos.
+
+**O que eu conferi:** abri os dois. `http.ts` "conhecia RG" dentro de um
+comentário que identifica o formato do número num regex de sanitização de PII.
+E `estado.ts` foi acusado de tocar em `window` porque a própria docstring dele
+diz "sem React, sem fetch, sem window".
+
+**O que estava errado:** o teste lia comentário como se fosse código. Pior que o
+falso positivo é o incentivo: um teste assim ensina a apagar comentário para
+passar, que é o contrário do que este repositório quer.
+
+**O que fiz:** o teste passou a remover comentários antes de varrer. As regras
+valem para código.
+
+---
+
+## V-005 — 31/08/2026, 21:47 · Vazamento entre testes escondendo a causa
+
+**O que o agente produziu:** testes de conferência que passavam isoladamente e
+falhavam em conjunto.
+
+**Como percebi:** rodei o arquivo inteiro e dois casos quebraram com "painel de
+campos ainda não renderizou" — uma mensagem que não tinha relação com o que
+falhava.
+
+**O que estava errado:** faltava `servidorDeTeste.resetHandlers()`. O tipo de
+documento **inventado** pelo teste T-03 vazava para os casos seguintes, que
+passavam a carregar um catálogo sem o tipo dos seus próprios documentos.
+
+**O que fiz:** exigi `resetHandlers()` e `removeAllListeners()` no `afterEach`, e
+que a suíte fosse rodada **três vezes seguidas** antes de eu aceitar o resultado.
+Teste que passa uma vez não prova nada quando há sorteio envolvido.
