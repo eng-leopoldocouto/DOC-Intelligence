@@ -1,0 +1,273 @@
+###############################################################################
+# DOC Intelligence — o contrato exercitável sem abrir a interface
+#
+# O contrato é entregável desta trilha: o enunciado diz que "a API ainda não
+# existe — o contrato é seu para definir e servir por mock, e faz parte da
+# entrega". Um contrato que só pode ser exercido através da interface que o
+# consome não está entregue: está acoplado ao seu primeiro cliente.
+#
+# Como usar:
+#   npm run mock     # sobe o contrato em http://localhost:8787/api/v1
+#   e execute os blocos abaixo, na ordem
+#
+# Formato .http, entendido por REST Client (VS Code), IntelliJ e Rider. Cada
+# bloco diz, no comentário, o que demonstra e qual fato do ambiente sustenta.
+# O equivalente em curl está no fim, para quem não usa nenhum dos três.
+###############################################################################
+
+@base = http://localhost:8787/api/v1
+
+# A identidade VEM DO HOST por cabeçalho — não há login aqui (ADR-011).
+# Apague as duas linhas de qualquer requisição para ver a degradação anônima.
+@usuarioId = ana.souza
+@usuarioNome = Ana Souza
+
+# Hash sintético, obviamente falso, no formato que o contrato exige
+# (^[a-f0-9]{64}$). A identidade do documento é o hash do CONTEÚDO, nunca o nome
+# do arquivo (fatos b e c).
+@hash = aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+
+
+###############################################################################
+# 1. O catálogo de tipos — o endpoint que sustenta o fato (f)
+#
+# É o endpoint mais importante do contrato inteiro: é ele que faz o front-end
+# não conhecer nenhum tipo de documento. Rótulo, campos, tipo de dado, máscara,
+# ordem, obrigatoriedade e limiar de confiança vêm todos daqui.
+#
+# Acrescentar "Certidão de Nascimento" ao produto é mudança de ZERO linhas de
+# front-end — é uma entrada a mais nesta resposta.
+###############################################################################
+
+GET {{base}}/tipos-documento
+
+
+###############################################################################
+# 2. Envio — responde 202, e não 200
+#
+# O 202 é a decisão do fato (a): o modelo leva de 5 a 40 segundos, e nenhuma
+# resposta síncrona é honesta nesse intervalo. O envio termina quando o servidor
+# ACEITA o arquivo, não quando o modelo responde. O documento nasce em RECEBIDO;
+# acompanhe pelo bloco 4.
+###############################################################################
+
+# @name envio
+POST {{base}}/documentos
+X-Usuario-Id: {{usuarioId}}
+X-Usuario-Nome: {{usuarioNome}}
+Content-Type: multipart/form-data; boundary=LimiteDoLote
+
+--LimiteDoLote
+Content-Disposition: form-data; name="arquivo"; filename="scan0001.pdf"
+Content-Type: application/pdf
+
+< ../../fixtures/documentos-ficticios/scan0001.pdf
+--LimiteDoLote
+Content-Disposition: form-data; name="contentHash"
+
+{{hash}}
+--LimiteDoLote
+Content-Disposition: form-data; name="nomeOrigem"
+
+scan0001.pdf
+--LimiteDoLote--
+
+
+###############################################################################
+# 3. O MESMO documento outra vez — 200 com duplicado: true, e não 409
+#
+# Fato (c): "o mesmo documento costuma chegar mais de uma vez — o cliente
+# reenvia por insegurança, o atendimento reenvia por precaução."
+#
+# Duas decisões aparecem nesta resposta:
+#
+#   * NENHUMA chamada ao modelo é disparada. Combinado com o fato (a), cada
+#     duplicata evitada é dinheiro que não foi gasto.
+#   * Responde 200, e não 409. Reenviar por precaução é comportamento razoável
+#     do atendimento; empurrar a interface para o ramo de erro num caso NORMAL
+#     treina a pessoa a ignorar mensagens de erro.
+#
+# Repare que o corpo traz o documento EXISTENTE, com o `nomeOrigem` do primeiro
+# envio — a interface mostra "já enviado em 11/08 às 09:12", e não um erro.
+# Repare também que o nome do arquivo mudou e o documento é o mesmo: identidade
+# é o hash do conteúdo (fato b).
+###############################################################################
+
+POST {{base}}/documentos
+X-Usuario-Id: {{usuarioId}}
+Content-Type: multipart/form-data; boundary=LimiteDoLote
+
+--LimiteDoLote
+Content-Disposition: form-data; name="arquivo"; filename="reenviado-por-precaucao.pdf"
+Content-Type: application/pdf
+
+< ../../fixtures/documentos-ficticios/scan0001.pdf
+--LimiteDoLote
+Content-Disposition: form-data; name="contentHash"
+
+{{hash}}
+--LimiteDoLote
+Content-Disposition: form-data; name="nomeOrigem"
+
+reenviado-por-precaucao.pdf
+--LimiteDoLote--
+
+
+###############################################################################
+# 4. Status em lote — UMA requisição para N documentos (fato e)
+#
+# No pico das 9h às 11h chegam mais de 800 documentos. Um polling por documento
+# a cada 3 s seriam 267 requisições por segundo saindo de UM navegador: o
+# gargalo seríamos nós, não o servidor.
+#
+# Acrescente quantos ids quiser, separados por vírgula. A resposta é resumida de
+# propósito — id, estado, versão e confiança. Nenhum campo extraído, porque
+# acompanhar não é ler dado pessoal (fato d).
+###############################################################################
+
+GET {{base}}/documentos/status?ids={{envio.response.body.documento.id}}
+
+
+###############################################################################
+# 5. A fila de conferência — listagem por estado, com cursor
+#
+# Cursor e não deslocamento: a fila MUDA enquanto é paginada — documentos entram
+# por cima e saem quando alguém confere. Deslocamento pularia ou repetiria itens.
+#
+# ATENÇÃO, e isto está declarado em 07-nao-feito.md e na D-10: os parâmetros são
+# `estado`, `limite` e `cursor`. NÃO existe busca por termo neste contrato.
+###############################################################################
+
+# @name fila
+GET {{base}}/documentos?estado=AGUARDANDO_CONFERENCIA&limite=5
+
+
+###############################################################################
+# 6. Reserva de conferência — contra o DESPERDÍCIO do fato (g)
+#
+# "Duas pessoas do atendimento podem abrir a fila de conferência ao mesmo
+# tempo." A reserva tem TTL de 5 minutos e é renovada enquanto a tela está ativa.
+#
+# Rode este bloco DUAS VEZES, trocando X-Usuario-Id na segunda: a segunda recebe
+# 409 nomeando quem reservou. O TTL existe por causa do pior modo de falha do
+# locking — a pessoa que abriu o documento, foi almoçar, e travou o item para
+# sempre.
+###############################################################################
+
+# @name reserva
+POST {{base}}/documentos/{{fila.response.body.itens.0.id}}/conferencia/claim
+X-Usuario-Id: {{usuarioId}}
+X-Usuario-Nome: {{usuarioNome}}
+
+
+###############################################################################
+# 7. Gravação com If-Match CORRETO — 200, e a versão avança
+#
+# Repare no que a resposta faz com o campo cujo valor MUDOU: `origem` vira
+# HUMANO e `confianca` vira 1. A incerteza do modelo deixou de ser relevante no
+# instante em que uma pessoa corrigiu — é por isso que o campo não volta a
+# aparecer como duvidoso.
+#
+# "Cujo valor mudou" é literal, e é o detalhe que só aparece rodando: reenviar o
+# mesmo valor que o modelo já tinha extraído NÃO marca o campo como humano. Ver
+# o documento como PRONTO não significa que alguém conferiu campo por campo —
+# significa que alguém assumiu o documento. É uma distinção que a interface
+# preserva e que este arquivo quase apagou.
+#
+# O documento vai para PRONTO e a reserva é liberada.
+###############################################################################
+
+# @name gravacao
+PATCH {{base}}/documentos/{{fila.response.body.itens.0.id}}/campos
+X-Usuario-Id: {{usuarioId}}
+X-Usuario-Nome: {{usuarioNome}}
+If-Match: {{fila.response.body.itens.0.versao}}
+Content-Type: application/json
+
+{
+  "campos": [
+    { "chave": "nome", "valor": "BELTRANA DE TAL DA SILVA" }
+  ]
+}
+
+
+###############################################################################
+# 8. Gravação com If-Match VELHO — 409, e é este o bloco que vale a leitura
+#
+# Mesma versão do bloco 7, que já não é mais a atual. Este é o mecanismo contra
+# a PERDA do fato (g): Ana e Bruno abrem o mesmo documento às 9h03; Ana corrige
+# a filiação, Bruno corrige o número; Bruno salva por último. Sem isto, a
+# correção da Ana desaparece SEM AVISO, e o documento entra na planilha com
+# aparência de conferido.
+#
+# O corpo do 409 é o ponto: traz `documentoAtual` inteiro e `alteradoPor`. A
+# interface consegue mostrar O QUE mudou e QUEM mudou, e devolver a decisão para
+# a pessoa. O cliente nunca resolve conflito sozinho — não sobrescreve em
+# silêncio nem descarta em silêncio.
+###############################################################################
+
+PATCH {{base}}/documentos/{{fila.response.body.itens.0.id}}/campos
+X-Usuario-Id: bruno.lima
+X-Usuario-Nome: Bruno Lima
+If-Match: {{fila.response.body.itens.0.versao}}
+Content-Type: application/json
+
+{
+  "campos": [
+    { "chave": "nome", "valor": "VALOR DO BRUNO" }
+  ]
+}
+
+
+###############################################################################
+# 9. Reprocessar — a única forma de gastar dinheiro de novo (fato a)
+#
+# NÃO existe retry automático de processamento em lugar nenhum deste sistema.
+# Cada chamada ao modelo é cobrada por documento, e o reflexo do front-end
+# ("falhou? tenta de novo") aqui é um defeito, não um recurso.
+#
+# Só aceita documento em FALHOU ou EXPIRADO; em qualquer outro estado responde
+# 409. Rode a listagem abaixo, copie um id e descomente as duas linhas seguintes.
+###############################################################################
+
+GET {{base}}/documentos?estado=FALHOU&limite=1
+
+# POST {{base}}/documentos/COLE-O-ID-AQUI/reprocessar
+# X-Usuario-Id: {{usuarioId}}
+
+
+###############################################################################
+# O mesmo, em curl — para quem não usa nenhum dos três editores.
+# Rode a partir da RAIZ do repositório, com `npm run mock` em outro terminal.
+#
+#   # 1. catálogo
+#   curl -s http://localhost:8787/api/v1/tipos-documento
+#
+#   # 2. envio (202 Accepted)
+#   curl -si -X POST http://localhost:8787/api/v1/documentos \
+#     -F "arquivo=@fixtures/documentos-ficticios/scan0001.pdf" \
+#     -F "contentHash=aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa" \
+#     -F "nomeOrigem=scan0001.pdf" | head -1
+#
+#   # 3. o mesmo hash de novo (200, duplicado: true, sem chamada ao modelo)
+#   curl -si -X POST http://localhost:8787/api/v1/documentos \
+#     -F "arquivo=@fixtures/documentos-ficticios/scan0001.pdf" \
+#     -F "contentHash=aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa" \
+#     -F "nomeOrigem=reenviado.pdf" | head -1
+#
+#   # 5. a fila, e o id do primeiro item
+#   ID=$(curl -s "http://localhost:8787/api/v1/documentos?estado=AGUARDANDO_CONFERENCIA&limite=1" \
+#        | python -c "import json,sys; print(json.load(sys.stdin)['itens'][0]['id'])")
+#
+#   # 7. gravação com If-Match correto (200)
+#   curl -si -X PATCH "http://localhost:8787/api/v1/documentos/$ID/campos" \
+#     -H "Content-Type: application/json" -H "If-Match: 1" \
+#     -H "X-Usuario-Nome: Ana Souza" \
+#     --data-raw '{"campos":[{"chave":"nome","valor":"BELTRANA DE TAL DA SILVA"}]}' | head -1
+#
+#   # 8. o MESMO If-Match, agora velho (409 com documentoAtual e alteradoPor)
+#   curl -s -X PATCH "http://localhost:8787/api/v1/documentos/$ID/campos" \
+#     -H "Content-Type: application/json" -H "If-Match: 1" \
+#     -H "X-Usuario-Nome: Bruno Lima" \
+#     --data-raw '{"campos":[{"chave":"nome","valor":"VALOR DO BRUNO"}]}'
+###############################################################################

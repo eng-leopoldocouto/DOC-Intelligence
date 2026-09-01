@@ -207,3 +207,155 @@ correção anterior não o atualizou, violando a regra 6 do `CLAUDE.md` — a qu
 que estes registros "não podem ser reconstruídos no fim". Ela tinha razão. Esta
 entrada foi escrita depois dos fatos que descreve, e não no momento deles. Fica
 declarado.
+
+---
+
+## V-008 — 01/09/2026, manhã · Auditoria externa: quatro defeitos meus, nenhum pego por teste
+
+Uma auditoria **externa a este repositório** devolveu uma lista em quatro blocos.
+O prompt está íntegro em
+[`prompts/0014`](prompts/0014-2026-09-01-auditoria-externa-defeitos.md).
+
+### O que verifiquei, rodando
+
+| Verificação | Comando | Resultado |
+|---|---|---|
+| Base antes de mexer | `npm run typecheck && npm test` | limpo, **64 testes** |
+| Depois de tudo | `npm run typecheck && npm run lint && npm test` | limpo, **0 avisos**, **96 testes** |
+| O linter não é vácuo | violação deliberada em `fila.ts` | saída **1**; removida, saída **0** |
+| O passo de CI dos tipos | `npm run gen:api && git diff --exit-code` | diff **vazio** |
+| O hook bloqueia | JSON na entrada padrão, cinco casos | `fetch(` fora de `shared/api/` → **2**; dentro → 0; tipo de documento em `features/` → **2**; em `mocks/` → 0; **em comentário → 0** |
+| A fatia continua de pé | `exemplos.http` inteiro contra `npm run mock` | 202 no envio, 200 `duplicado:true` no reenvio, 409 no claim do segundo, 409 no `If-Match` velho com `alteradoPor` |
+| 360 px | navegador em 360 × 800, medindo | sem rolagem horizontal, **0** elementos ultrapassando a largura, **0** alvos de toque abaixo de 44 px |
+
+### O hook disparou? Sim — e o interessante é *quando*
+
+**Disparou nos testes que fiz de propósito, e não durante o desenvolvimento.**
+Isso é informação, não decepção: nesta rodada eu não escrevi nada que quebrasse
+as regras 2 ou 3, porque o trabalho foi de acessibilidade, CSS e validação de
+formato — nenhum deles pede rede nova nem nome de tipo de documento.
+
+O caso que mais me interessou foi o **quinto**: um arquivo cujo comentário cita
+`fetch(` e `RG`, que **passa**. Se ele não passasse, o hook estaria ensinando a
+apagar explicação — e o teste de arquitetura já tinha aprendido essa lição do
+jeito difícil (V-004). Um hook que repete um erro que o repositório já corrigiu
+uma vez é pior que hook nenhum.
+
+### Onde o agente errou desta vez — quatro vezes, e nenhuma foi pega por teste
+
+**1. O aviso do segundo portão mentia.** O agente escreveu o texto *"O modelo
+confia (X%), o formato não fecha"* para todo campo reprovado no formato. Abri a
+tela: o CPF do primeiro documento tinha confiança **60%**, e a interface exibia
+**"O modelo confia (60%)"** — a própria contradição. O motivo de formato tem
+precedência sobre o de confiança, e o texto assumia que só o primeiro estava
+ativo. Nenhum teste pegava, porque todos os testes usavam confiança alta.
+Corrigido, com teste de regressão para o caso dos **dois** portões acusando.
+
+**2. Duas coisas ficaram indemonstráveis.** A fila semeada esperava 55 minutos
+contra um limite de 60, e as confianças semeadas eram todas baixas. Resultado: o
+destaque de fila tensa e o caso principal da ADR-015 existiam no código e
+**nunca apareciam na tela**. Não é defeito de lógica — é pior, é recurso que
+ninguém vê. Ajustei a semeadura, com o porquê escrito dentro do próprio mock,
+pelo mesmo argumento da D-03.
+
+**3. O agente afirmou ter encontrado um defeito que não existia.** Ao escrever o
+`.gitattributes`, ele justificou o arquivo dizendo que a CI falharia sempre no
+Linux por causa de CRLF no blob commitado. A medição que sustentava a afirmação
+era `od -c | grep -c '\\r'` — que, depois de passar pelo shell, virou uma busca
+pela **letra "r"**, e contava linhas quaisquer. O arquivo sempre esteve em LF.
+
+Este é o erro mais instrutivo dos três, porque é o **oposto** dos anteriores:
+não foi omissão, foi um achado inventado com aparência de evidência. Mantive o
+`.gitattributes` — ele é defensável por outro motivo, e está escrito nele qual —
+mas reescrevi a justificativa e registro aqui, porque *"encontrei um problema"*
+sem lastro é a mesma falha das D-06 e D-09, apenas com o sinal trocado.
+
+**4. O foco pulava para outro campo enquanto a pessoa digitava.** Encontrado
+relendo o `Dialogo.tsx` enquanto o auditor rodava, e é o mais sutil dos quatro. O
+efeito que instala a contenção de foco dependia de `aoFechar` — e quem monta o
+diálogo passa `onCancelar={() => setRejeitando(false)}`, uma closure **nova a
+cada render do pai**. O pai re-renderiza sozinho: `useClaim` renova a reserva por
+`setInterval` enquanto a tela está aberta. A cada renovação o efeito era
+desmontado e remontado, e o foco saltava do campo de observação de volta para o
+seletor de motivo. Quem estivesse escrevendo a justificativa de uma rejeição
+perderia o cursor de tempos em tempos, sem entender por quê.
+
+Corrigido com `aoFechar` numa ref e o efeito rodando uma vez. **E o teste de
+regressão errou antes de acertar:** a primeira versão dele passava com e sem o
+defeito, porque no harness que escrevi o campo digitado já era o primeiro
+focável — não havia para onde o foco saltar. Só ficou claro depois de eu forçar
+a falha removendo a correção. Um teste que passa dos dois lados é pior que teste
+nenhum: compra tranquilidade sem entregar nada.
+
+### A lição que muda o método, de novo
+
+As três rodadas anteriores ensinaram **procurar pelo número, não pelo assunto**.
+Esta acrescenta duas coisas.
+
+**Abrir a tela.** Os quatro erros acima passaram por `typecheck`, por `lint`, por
+96 testes e pela minha leitura. Dois deles morreram em menos de um minuto de
+navegador aberto — e nenhum teste os pegaria, porque teste verifica o que alguém
+pensou em verificar.
+
+**Forçar o teste a falhar antes de confiar nele.** Fiz isso três vezes nesta
+rodada, e nas três valeu: no linter (violação deliberada → saída 1), no teste que
+compara a lista do hook com a do teste de arquitetura (cópia deliberada →
+falhou), e no teste de foco — que **passava com e sem o defeito** até eu tentar.
+Sem essa tentativa, eu teria entregado um teste decorativo dentro da mesma
+rodada em que fechei a D-08 justamente por causa de listas de verificação
+decorativas.
+
+**Ressalva sobre este arquivo, de novo:** esta entrada também foi escrita ao
+final da rodada, e não no momento de cada fato. A diferença para a anterior é
+que agora existe registro intermediário — os commits `c37136c`, `4f88de3` e
+`78058bf` carimbam cada bloco, e as saídas coladas acima são as reais.
+
+### O que a quarta auditoria acrescentou, e por que ela vale mais que as três
+
+Veredito **APROVADO COM RESSALVAS, 89,5/100**, com dez achados. Ela confirmou por
+comando que as guardas seguram — hook bloqueando nos seis casos, `gen:api` com
+diff vazio, contrato devolvendo 409 no `If-Match` velho, `spec-v1` 28 minutos
+antes do primeiro arquivo em `src/` — e mesmo assim achou dez lugares em que o
+texto não correspondia ao código. Cinco eu corrigi nesta rodada; três ela mesma
+viu serem corrigidos enquanto auditava; um segue aberto (A-06) e um é o registro
+de tempo (A-01), que era o mais grave.
+
+**A-01 merece nota.** O registro de tempo parava na madrugada e declarava 3h20,
+enquanto o `git log` mostrava sete commits da manhã seguinte. A soma da coluna
+estava certa; **o que faltava era coluna.** É a quarta ocorrência do mesmo
+defeito no mesmo arquivo, e a primeira em que o erro é o número que faltou
+escrever. O padrão que eu mesmo nomeei se aplicou com precisão: a carta foi
+reescrita e o arquivo que ela manda conferir não foi tocado.
+
+**O achado que mudou a ferramenta, e não só o texto.** Em vez de listar a quinta
+ocorrência do mesmo defeito, o auditor apontou a causa — *o número mora em dois
+lugares, e a resposta até aqui era disciplina* — e recomendou um passo de CI
+comparando o README com a realidade. Implementei: `scripts/conferir-contagens.mjs`.
+
+Ele **encontrou um erro meu no minuto em que passou a existir**: eu tinha
+acabado de escrever "190 comandos de auditoria" a partir de um `grep -c`, e o
+número certo é 187 — o `grep` contava também os blocos citados dentro do prompt,
+que não são comandos que alguém rodou. Um erro cometido dentro do commit que
+existia para impedir esse tipo de erro, pego pela própria ferramenta do commit.
+
+Verificado que ele morde: dois números trocados de propósito no README →
+saída 1, com a lista do que não bate; restaurados → saída 0.
+
+**A-06 ficou aberto por algumas horas, e a forma como fechou é o próprio ponto.**
+`onde-o-agente-errou.md` é o parágrafo em primeira pessoa que o item II.4 pede, e
+a seção 7 do `CLAUDE.md` diz que **o agente não escreve conteúdo em primeira
+pessoa do candidato**. Quando o auditor apontou que o arquivo não trazia os erros
+desta rodada, o agente não o escreveu por conta própria: deixou o achado aberto e
+declarado, com o material pronto aqui em V-008. **Pedi o rascunho, revisei e
+aprovei** — e só então ele foi para o arquivo.
+
+Duas coisas que valem registro. Ao aplicar o texto aprovado, o agente encontrou
+uma **colisão que nem ele nem eu tínhamos visto no rascunho**: a frase nova
+começava com "A quarta não foi" e o parágrafo imediatamente seguinte já abria com
+"A quarta correção não foi minha", falando de outra coisa. Reescreveu para não
+repetir o ordinal e me avisou da mudança em vez de aplicá-la calado. É o mesmo
+defeito de vizinhança de sempre, desta vez pego antes de virar texto entregue.
+
+E o arquivo passou a conter a admissão do erro nº 3 desta rodada — o achado
+inventado —, que é material que só existe porque o agente errou e o registro
+estava escrito de um jeito conferível.

@@ -1,0 +1,58 @@
+name: CI
+
+# Existe por causa da D-09: o texto afirmava que a guarda de arquitetura
+# "falha o build", e o build era apenas `tsc -b && vite build`. Quem rodasse
+# só o build não via guarda nenhuma. Agora a afirmação tem lastro.
+on:
+  push:
+    branches: ["**"]
+  pull_request:
+
+jobs:
+  verificar:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: npm
+
+      # `npm ci` e não `npm install`: instala exatamente o lock, que é o que o
+      # README manda outra pessoa rodar.
+      - run: npm ci
+
+      - name: Linter (fecha a D-08)
+        run: npm run lint
+
+      - name: Tipos em modo estrito
+        run: npm run typecheck
+
+      # As guardas de arquitetura (nenhum tipo de documento no front, uma única
+      # costura de rede, entities puro) vivem aqui dentro. É este passo que faz
+      # a regra 2 do CLAUDE.md deixar de depender de boa vontade.
+      - name: Testes
+        run: npm test
+
+      # O README afirma que os tipos são GERADOS do contrato e nunca escritos à
+      # mão (regra 1). Até aqui isso era palavra; agora é verificado: se alguém
+      # editar types.gen.ts sem tocar no openapi.yaml, ou mudar o contrato sem
+      # regerar, o diff não vem vazio e a CI cai.
+      - name: Os tipos correspondem ao contrato
+        run: |
+          npm run gen:api
+          if ! git diff --exit-code -- src/shared/api/types.gen.ts; then
+            echo "::error file=src/shared/api/types.gen.ts::Os tipos gerados divergem de docs/spec/openapi.yaml. Rode 'npm run gen:api' e faça commit do resultado."
+            exit 1
+          fi
+
+      # Quatro rodadas de auditoria acharam a MESMA classe de defeito quatro
+      # vezes: um numero escrito no README e desmentido pelo repositorio. A
+      # resposta ate aqui era disciplina; disciplina falhou quatro vezes
+      # seguidas. Este passo tira o erro do alcance da boa memoria.
+      - name: As contagens do README batem com a realidade
+        run: npm run contagens
+
+      - name: O projeto compila
+        run: npm run build

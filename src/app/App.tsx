@@ -1,5 +1,6 @@
 import { NavLink, Outlet } from 'react-router-dom'
 import { identidadeAtual } from '@/shared/api/identidade'
+import { FronteiraDeErro } from './FronteiraDeErro'
 
 export function App() {
   const identidade = identidadeAtual()
@@ -30,8 +31,14 @@ export function App() {
         </div>
       </header>
 
+      {/* A fronteira envolve AS ROTAS, não a casca: quando uma tela quebra, o
+          cabeçalho e a navegação continuam vivos e a pessoa sai dali sem
+          recarregar. Envolver a casca inteira trocaria a tela branca por outra
+          tela branca, só que com texto. */}
       <main>
-        <Outlet />
+        <FronteiraDeErro>
+          <Outlet />
+        </FronteiraDeErro>
       </main>
     </div>
   )

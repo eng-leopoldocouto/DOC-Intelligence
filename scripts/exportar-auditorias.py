@@ -16,11 +16,36 @@ import json
 from pathlib import Path
 
 RAIZ = Path(__file__).resolve().parent.parent
-SESSAO = "44b09d0e-9734-446d-9283-e4803cfd3aa7"
-PASTA = (Path.home() / ".claude" / "projects"
-         / "C--Users-LAMARCK-Documents-LDC-CLAUDE-CODE-DOC-Intelligence"
-         / SESSAO / "subagents")
 SAIDA = RAIZ / "docs" / "ia" / "transcricao" / "auditorias"
+
+# A pasta de transcricoes e DESCOBERTA, e nao fixa.
+#
+# A primeira versao deste script trazia o caminho de uma sessao especifica,
+# numa maquina especifica, escrito a mao. Funcionou uma vez e quebrou na
+# rodada seguinte — a quarta auditoria rodou noutra sessao, noutro diretorio
+# de trabalho (um worktree), e o script apontava para um caminho que nao
+# existia mais. Um exportador que so exporta o passado nao serve para nada.
+PROJETOS = Path.home() / ".claude" / "projects"
+
+
+def pastas_de_subagentes() -> list[Path]:
+    """Todas as pastas de subagentes de qualquer sessao deste projeto."""
+    if not PROJETOS.is_dir():
+        return []
+    encontradas = []
+    for projeto in PROJETOS.iterdir():
+        if "DOC-Intelligence" not in projeto.name:
+            continue
+        encontradas.extend(sorted(projeto.glob("*/subagents")))
+    return encontradas
+
+
+def achar_transcricao(ident: str) -> Path | None:
+    for pasta in pastas_de_subagentes():
+        caminho = pasta / ("agent-" + ident + ".jsonl")
+        if caminho.exists():
+            return caminho
+    return None
 
 AUDITORIAS = [
     ("a1cdacab10798cd2a", "0-primeira-tentativa-interrompida",
@@ -36,6 +61,13 @@ AUDITORIAS = [
      "Segunda auditoria — 86/100, seis achados novos",
      "As ressalvas anteriores caíram, mas quatro dos seis achados novos foram "
      "INTRODUZIDOS pela própria rodada de correção."),
+    ("a6e307fd6c4bed077", "4-quarta-auditoria",
+     "Quarta auditoria — 89,5/100, dez achados e o conserto estrutural",
+     "Rodou depois de uma auditoria EXTERNA ao repositório. Confirmou por comando que "
+     "as guardas seguram (hook, gen:api, linter, contrato), e ainda assim achou dez "
+     "divergências texto x código — entre elas a quarta ocorrência do mesmo defeito no "
+     "registro de tempo, desta vez pelo número que faltou escrever. Recomendou o passo "
+     "de CI que compara as contagens do README com a realidade."),
     ("a850b3732dbf9b99b", "3-terceira-auditoria",
      "Terceira auditoria — 85/100, o padrão nomeado",
      "Encontrou oito achados e nomeou o padrão que as duas anteriores não viram: "
@@ -75,8 +107,8 @@ def detalhar(bloco: dict) -> str:
 
 
 def exportar(ident, arquivo, titulo, resumo):
-    origem = PASTA / ("agent-" + ident + ".jsonl")
-    if not origem.exists():
+    origem = achar_transcricao(ident)
+    if origem is None:
         return None
 
     partes = [
@@ -133,8 +165,9 @@ def exportar(ident, arquivo, titulo, resumo):
 
 
 def main() -> None:
-    if not PASTA.is_dir():
-        raise SystemExit("Pasta de subagentes nao encontrada: " + str(PASTA))
+    pastas = pastas_de_subagentes()
+    if not pastas:
+        raise SystemExit("Nenhuma pasta de subagentes encontrada em " + str(PROJETOS))
     print("Exportando as auditorias\n")
     for ident, arquivo, titulo, resumo in AUDITORIAS:
         r = exportar(ident, arquivo, titulo, resumo)

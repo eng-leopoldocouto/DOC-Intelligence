@@ -170,3 +170,109 @@ h1 { font-size: 20px; margin: 0 0 4px; letter-spacing: -.01em; }
 .tabela-conflito th { font-size: 12px; color: var(--tinta-fraca); font-weight: 550; }
 .tabela-conflito td.meu { background: var(--acento-fraco); }
 .tabela-conflito td.dele { background: var(--alerta-fraco); }
+
+/* --- Segundo portão: formato inválido (ADR-015) ---------------------------- */
+
+/* Vermelho, e não âmbar: confiança baixa é "pode estar errado"; formato que não
+   fecha é "está errado". Usar a mesma cor para os dois apagaria a diferença
+   entre olhar de novo e corrigir. */
+.campo.invalido input, .campo.invalido select { border-color: var(--erro); background: #fffafa; }
+.aviso-invalido { font-size: 12px; color: var(--erro); }
+
+/* --- Pressão da fila (fato e) --------------------------------------------- */
+
+.pressao-da-fila {
+  display: flex; flex-wrap: wrap; align-items: baseline; gap: 4px;
+  padding: 10px 14px; margin: -8px 0 4px; font-size: 14px;
+  background: var(--papel); border: 1px solid var(--borda); border-radius: var(--raio);
+}
+.pressao-da-fila.tensa { background: var(--alerta-fraco); border-color: #f5d98e; color: var(--alerta); }
+.pressao-da-fila-nota { flex-basis: 100%; margin: 4px 0 0; font-size: 12px; line-height: 1.45; }
+
+/* --- Fronteira de erro, anúncio e rolagem de tabela ------------------------ */
+
+.falha-de-tela { padding: 24px; max-width: 640px; }
+.falha-de-tela h2 { margin: 0 0 8px; font-size: 17px; }
+.falha-de-tela p { margin: 0 0 10px; font-size: 14px; line-height: 1.5; }
+.falha-de-tela-acoes { justify-content: flex-start; }
+
+/* Região viva do acompanhamento. Fica VISÍVEL de propósito: quem olhou para o
+   lado por trinta segundos também precisa saber o que mudou, e uma região só
+   para leitor de tela seria invisível na revisão de quem programa — o caminho
+   mais curto para ela apodrecer sem ninguém notar. */
+.anuncio-vivo {
+  min-height: 20px; margin: -12px 0 16px;
+  font-size: 13px; color: var(--acento);
+}
+.anuncio-vivo:empty { margin-bottom: 0; }
+
+/* Tabela larga rola DENTRO da própria caixa. Sem isto, o diálogo de conflito
+   empurra a página inteira para o lado num aparelho estreito. */
+.rolagem-tabela { overflow-x: auto; }
+
+/* --- Classes que substituíram estilo inline (para as media queries agirem) -- */
+
+.acoes-item { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; }
+.acoes-conferencia { display: flex; gap: 8px; flex-wrap: wrap; }
+.confirmacao-custo { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
+.confirmacao-custo-texto { font-size: 12px; color: var(--alerta); }
+.resumo-envio { display: flex; align-items: center; gap: 16px; margin-top: 20px; flex-wrap: wrap; }
+.resumo-envio strong { font-size: 14px; }
+.limpar-lista { margin-left: auto; }
+.carregar-mais { margin-top: 16px; }
+
+/* Só aparece em tela estreita — ver ADR-014. */
+.aviso-desktop { display: none; }
+
+/* --- Enviar e acompanhar cabem num aparelho de 360 px (ADR-014, fato b) ----
+   Quem envia é o atendimento, do próprio celular. Estas duas telas são as que
+   essa pessoa usa; a conferência é decisão declarada de desktop. */
+
+@media (max-width: 760px) {
+  /* 44 px é o alvo de toque mínimo. Um botão de 35 px de altura é o motivo real
+     pelo qual alguém "erra o botão" com o polegar na fila do balcão. */
+  .botao { min-height: 44px; padding: 10px 14px; }
+  .barra nav a { min-height: 44px; display: flex; align-items: center; }
+  .botao-inline { min-height: 44px; display: inline-flex; align-items: center; padding: 0 4px; }
+  .campo input, .campo select, .campo textarea { min-height: 44px; }
+
+  .barra {
+    height: auto; flex-wrap: wrap; gap: 8px 12px; padding: 10px 12px;
+    align-items: baseline;
+  }
+  .barra nav { margin-left: 0; order: 3; width: 100%; gap: 2px; }
+  .barra nav a { flex: 1; justify-content: center; padding: 6px 8px; }
+  .usuario { margin-left: auto; padding-left: 0; border-left: 0; }
+
+  main { padding: 16px 12px; }
+
+  /* Duas colunas viram duas linhas: miniatura e texto em cima, ações embaixo,
+     ocupando a largura toda. As ações são o que estourava a linha. */
+  .item { grid-template-columns: 40px minmax(0, 1fr); gap: 10px; }
+  .item .miniatura { width: 40px; height: 40px; }
+  .acoes-item { grid-column: 1 / -1; }
+  .acoes-item .botao, .acoes-item .etiqueta { flex: 1 1 auto; text-align: center; }
+
+  /* Texto longo (nome padronizado, nome de arquivo do WhatsApp) quebra em vez
+     de empurrar a página para o lado. */
+  .item .meta, .item .nome, .dica-campo { overflow-wrap: anywhere; }
+
+  .zona-envio { padding: 28px 16px; }
+  .limpar-lista { margin-left: 0; width: 100%; }
+  .carregar-mais { width: 100%; }
+
+  .cabecalho-conferencia { flex-direction: column; }
+  .acoes-conferencia { width: 100%; }
+  .acoes-conferencia .botao { flex: 1 1 auto; }
+  .dialogo { padding: 16px; max-height: 92vh; }
+  .dialogo-acoes .botao { flex: 1 1 auto; }
+
+  /* Decisão declarada, não degradação silenciosa: a razão de ser da conferência
+     é o documento AO LADO dos campos, e empilhado ela deixa de cumpri-la.
+     Dizer isso é mais honesto do que fingir que a tela serve (ADR-014). */
+  .aviso-desktop {
+    display: block; margin: 0 0 12px; padding: 10px 12px;
+    background: var(--alerta-fraco); color: var(--alerta);
+    border-radius: var(--raio); font-size: 13px; line-height: 1.45;
+  }
+}

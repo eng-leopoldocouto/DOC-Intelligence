@@ -116,7 +116,8 @@ ACOMPANHAMENTO
                                      · FALHOU · EXPIRADO
 
 CONFERÊNCIA
-  GET /documentos?status=AGUARDANDO_CONFERENCIA  (cursor, virtualizada)
+  GET /documentos?status=AGUARDANDO_CONFERENCIA  (cursor; a virtualização
+                                                  prometida aqui NÃO existe — D-06)
     → POST /{id}/conferencia/claim   (lease 5 min, renovado)
     → GET /tipos-documento           (schema → registry)
     → visualizador do original  ||  campos renderizados por schema

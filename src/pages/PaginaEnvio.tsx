@@ -21,10 +21,8 @@ export function PaginaEnvio() {
 
       {itens.length > 0 && (
         <>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 16, marginTop: 20 }}>
-            <strong style={{ fontSize: 14 }}>
-              {enviados} recebido{enviados === 1 ? '' : 's'}
-            </strong>
+          <div className="resumo-envio">
+            <strong>{enviados} recebido{enviados === 1 ? '' : 's'}</strong>
             {duplicados > 0 && (
               <span className="etiqueta atencao">
                 {duplicados} duplicata{duplicados === 1 ? '' : 's'} descartada
@@ -36,7 +34,7 @@ export function PaginaEnvio() {
                 {recusados} recusado{recusados === 1 ? '' : 's'}
               </span>
             )}
-            <button type="button" className="botao" onClick={limpar} style={{ marginLeft: 'auto' }}>
+            <button type="button" className="botao limpar-lista" onClick={limpar}>
               Limpar lista
             </button>
           </div>

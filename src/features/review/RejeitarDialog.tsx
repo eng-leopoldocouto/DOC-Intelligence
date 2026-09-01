@@ -7,6 +7,7 @@
  * inventado com aparência de conferido.
  */
 import { useState } from 'react'
+import { Dialogo } from '@/shared/ui/Dialogo'
 import type { MotivoRejeicao } from '@/shared/api/client'
 
 const MOTIVOS: { valor: MotivoRejeicao; rotulo: string }[] = [
@@ -28,42 +29,11 @@ export function RejeitarDialog({
   const [observacao, setObservacao] = useState('')
 
   return (
-    <div className="dialogo-fundo" role="dialog" aria-modal="true" aria-labelledby="titulo-rejeitar">
-      <div className="dialogo">
-        <h2 id="titulo-rejeitar">Rejeitar documento</h2>
-        <p className="subtitulo">
-          O documento sai da fila e quem enviou recebe o motivo. Isso não gera
-          reprocessamento — reprocessar uma foto ilegível chega ao mesmo lugar,
-          cobrando de novo.
-        </p>
-
-        <div className="campo">
-          <label htmlFor="motivo-rejeicao">Motivo</label>
-          <select
-            id="motivo-rejeicao"
-            value={motivo}
-            onChange={(e) => setMotivo(e.target.value as MotivoRejeicao)}
-            required
-          >
-            <option value="">Escolha um motivo</option>
-            {MOTIVOS.map((m) => (
-              <option key={m.valor} value={m.valor}>{m.rotulo}</option>
-            ))}
-          </select>
-        </div>
-
-        <div className="campo">
-          <label htmlFor="observacao-rejeicao">Observação (opcional)</label>
-          <textarea
-            id="observacao-rejeicao"
-            rows={3}
-            value={observacao}
-            onChange={(e) => setObservacao(e.target.value)}
-            placeholder="O que a pessoa que enviou precisa saber para reenviar corretamente"
-          />
-        </div>
-
-        <div className="dialogo-acoes">
+    <Dialogo
+      titulo="Rejeitar documento"
+      aoFechar={onCancelar}
+      acoes={
+        <>
           <button type="button" className="botao" onClick={onCancelar}>Cancelar</button>
           <button
             type="button"
@@ -76,8 +46,40 @@ export function RejeitarDialog({
           >
             {enviando ? 'Rejeitando…' : 'Confirmar rejeição'}
           </button>
-        </div>
+        </>
+      }
+    >
+      <p className="subtitulo">
+        O documento sai da fila e quem enviou recebe o motivo. Isso não gera
+        reprocessamento — reprocessar uma foto ilegível chega ao mesmo lugar,
+        cobrando de novo.
+      </p>
+
+      <div className="campo">
+        <label htmlFor="motivo-rejeicao">Motivo</label>
+        <select
+          id="motivo-rejeicao"
+          value={motivo}
+          onChange={(e) => setMotivo(e.target.value as MotivoRejeicao)}
+          required
+        >
+          <option value="">Escolha um motivo</option>
+          {MOTIVOS.map((m) => (
+            <option key={m.valor} value={m.valor}>{m.rotulo}</option>
+          ))}
+        </select>
       </div>
-    </div>
+
+      <div className="campo">
+        <label htmlFor="observacao-rejeicao">Observação (opcional)</label>
+        <textarea
+          id="observacao-rejeicao"
+          rows={3}
+          value={observacao}
+          onChange={(e) => setObservacao(e.target.value)}
+          placeholder="O que a pessoa que enviou precisa saber para reenviar corretamente"
+        />
+      </div>
+    </Dialogo>
   )
 }
