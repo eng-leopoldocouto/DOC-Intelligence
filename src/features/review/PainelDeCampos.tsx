@@ -42,6 +42,7 @@ export function PainelDeCampos({
                     ? 'CONFIANCA_BAIXA'
                     : null
               }
+              limiar={limiar}
               onChange={(v) => onChange(descritor.chave, v)}
             />
           )

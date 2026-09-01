@@ -175,10 +175,30 @@ um `eslint-disable-line` em `PaginaConferencia.tsx`.
 voltei para ajustar a definição de pronto, que passou a exigir um comando
 inexistente.
 
-**Correção aplicada:** removi a exigência do `CLAUDE.md` e do README, em vez de
-instalar o ESLint às pressas no fim. **Uma regra que ninguém pode executar é pior
-que a ausência da regra** — ensina que a lista de verificação é decorativa. O
-`typecheck` estrito, esse sim, roda e é exigido.
+**Correção aplicada na hora:** removi a exigência do `CLAUDE.md` e do README, em
+vez de instalar o ESLint às pressas no fim. **Uma regra que ninguém pode executar
+é pior que a ausência da regra** — ensina que a lista de verificação é
+decorativa. O `typecheck` estrito, esse sim, roda e é exigido.
+
+### FECHADA em 01/09/2026
+
+`npm run lint` existe e passa: **oxlint**, com `--deny-warnings`, também na CI.
+
+Escolhi oxlint e não ESLint por uma razão que não é velocidade: **zero
+configuração de plugin**. O ESLint desta pilha exigiria quatro pacotes e um
+arquivo de configuração que ninguém revisa, e a chance de eu introduzir um
+conjunto de regras que só faz barulho era alta a essa altura do prazo.
+
+Houve **um** aviso em todo o `src/` e `tests/` —
+`unicorn/no-new-array` em `features/upload/filaDeEnvio.ts`, sobre
+`new Array<T>(n)`. Corrigi o código (`Array.from({ length: n })`, comportamento
+idêntico ali) em vez de desligar a regra: silenciar regra para alcançar "zero
+avisos" seria reincidir exatamente na lista de verificação decorativa que esta
+divergência denunciou.
+
+**Verificado que o comando não é vácuo:** introduzi uma violação deliberada num
+arquivo e o linter a apontou com saída 1; removida, saída 0. Um linter que não
+varre nada passa igual.
 
 ---
 
@@ -202,6 +222,22 @@ fora do prazo desta entrega.
 **Registro esta divergência** porque ela é da mesma classe das D-06 e D-07:
 afirmação de texto sem lastro no que está montado. Tendo corrigido aquelas
 depois da auditoria, deixar esta de pé seria incoerente.
+
+### FECHADA em 01/09/2026
+
+`.github/workflows/ci.yml` roda em todo push e em toda *pull request*:
+`npm ci` · `npm run lint` · `npm run typecheck` · `npm test` ·
+**regerar os tipos e falhar se o diff não vier vazio** · `npm run build`.
+
+O penúltimo passo é o que vale mais do que os outros. O README afirma, desde o
+começo, que os tipos são **gerados** do contrato e nunca escritos à mão (regra 1
+do `CLAUDE.md`). Até aqui isso era palavra: agora, se alguém editar
+`types.gen.ts` sem tocar no `openapi.yaml`, ou mudar o contrato sem regerar, o
+diff não vem vazio e a CI cai. **A regra 1 deixou de depender de disciplina.**
+
+E a guarda G1 finalmente "falha o build" no sentido em que a ADR-008 prometia —
+`npm test` inclui `tests/arquitetura/fronteiras.test.ts`, e `npm test` agora é
+um passo obrigatório de CI.
 
 ---
 

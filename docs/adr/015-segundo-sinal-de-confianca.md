@@ -45,6 +45,12 @@ dígito por dígito"*. São dois avisos distintos porque a ação da pessoa é
 distinta: no primeiro ela compara com a imagem; no segundo ela **já sabe** que
 há um erro, ainda que a imagem pareça concordar.
 
+*Detalhe que só apareceu rodando a tela:* os dois portões podem acusar ao mesmo
+tempo, e a primeira versão do aviso escrevia **"O modelo confia (60%)"** — a
+própria contradição, num campo que reprovava nos dois. Quando a confiança
+também está abaixo do limiar, o texto passa a ser *"Confiança baixa (60%) e o
+formato não fecha"*. A frase de efeito só é usada onde ela é verdadeira.
+
 Três decisões menores que carregam peso:
 
 - **Formato antes de confiança.** Quando os dois portões acusam, o motivo

@@ -8,12 +8,18 @@
  * Ficam num arquivo só porque são variações de uma mesma coisa, de ~15 linhas
  * cada. Divergência do plano registrada em docs/spec/08-divergencias.md.
  */
+import { precisaConferencia } from '@/entities/documento/estado'
 import { formatarDocumento, mascararDocumento } from '@/shared/lib/mascara'
 import type { PropsDeCampo } from './tipos'
 
+const porcentagem = (c: number | null | undefined) =>
+  c == null ? '' : ` (${Math.round(c * 100)}%)`
+
 function Envolucro({
-  descritor, motivo, campo, children,
+  descritor, motivo, campo, limiar, children,
 }: PropsDeCampo & { children: React.ReactNode }) {
+  // Os dois portões são independentes e podem acusar ao mesmo tempo.
+  const modeloConfiava = campo ? !precisaConferencia(campo.confianca, limiar) : false
   return (
     <div className={`campo ${motivo ? 'duvidoso' : ''} ${motivo === 'FORMATO_INVALIDO' ? 'invalido' : ''}`}>
       <label htmlFor={`campo-${descritor.chave}`}>
@@ -28,16 +34,15 @@ function Envolucro({
           mesmo que a imagem pareça concordar (ADR-015). */}
       {motivo === 'CONFIANCA_BAIXA' && (
         <span className="aviso-campo">
-          Confiança baixa
-          {campo?.confianca != null && ` (${Math.round(campo.confianca * 100)}%)`}
-          {' '}— confira contra o documento
+          Confiança baixa{porcentagem(campo?.confianca)} — confira contra o documento
         </span>
       )}
       {motivo === 'FORMATO_INVALIDO' && (
         <span className="aviso-invalido">
-          O modelo confia
-          {campo?.confianca != null && ` (${Math.round(campo.confianca * 100)}%)`}
-          , o formato não fecha — confira dígito por dígito
+          {modeloConfiava
+            ? `O modelo confia${porcentagem(campo?.confianca)}, o formato não fecha`
+            : `Confiança baixa${porcentagem(campo?.confianca)} e o formato não fecha`}
+          {' '}— confira dígito por dígito
         </span>
       )}
 

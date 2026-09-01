@@ -72,4 +72,50 @@ ferramenta, como o editor.
 - **`.claude/agents/auditor-de-entrega.md`** — subagente especialista criado
   para conferir a entrega final contra o enunciado e emitir veredito.
   *(O relatório produzido por ele fica fora do escopo da entrega, em `auditoria/`,
-  que está no `.gitignore`.)*
+  que está no `.gitignore`; as transcrições das auditorias estão em
+  `transcricao/auditorias/`.)*
+- **`.claude/hooks/guarda-regras.mjs`** e **`.claude/settings.json`** — um hook
+  `PreToolUse` que **bloqueia a escrita** antes que ela aconteça. Detalhado
+  abaixo.
+
+## O hook: as duas regras que deixaram de depender de boa vontade
+
+As duas regras mais estruturais do `CLAUDE.md` são negativas, e regra negativa
+é a mais fácil de quebrar sem perceber:
+
+| Regra | O que o hook barra | Onde vale |
+|---|---|---|
+| **2** — nenhum tipo de documento no front-end | `"RG"`, `"contracheque"`, `"procuração"`, `"laudo"`… entrando em código | `src/`, exceto `src/mocks/` |
+| **3** — uma única costura de rede | `fetch(` entrando em código | `src/`, exceto `src/shared/api/` |
+
+**Por que um hook, se já havia um teste.** O teste de arquitetura verifica as
+mesmas duas regras e continua existindo — mas ele chega **depois**: o código já
+foi escrito, já parece certo, e desfazê-lo custa mais do que não tê-lo escrito.
+O hook chega **antes**, e devolve ao agente o motivo junto com a recusa, em vez
+de uma falha de teste sem contexto minutos depois.
+
+**Três detalhes que decidem se ele presta:**
+
+1. **Ele lê o conteúdo sem comentários.** É a lição que o teste de arquitetura
+   já tinha aprendido do jeito difícil — a primeira versão dele acusou
+   `estado.ts` de tocar em `window` porque a docstring dizia *"sem React, sem
+   fetch, sem window"*. Um hook que pune comentário ensina a apagar explicação.
+2. **A lista de termos não mora no hook.** Mora em
+   `.claude/hooks/regras-do-projeto.json`, lida também pelo teste de
+   arquitetura — e **há um teste que falha se o hook passar a guardar uma cópia
+   própria**. Duas listas divergiriam em silêncio, e a divergência apareceria do
+   pior jeito possível: o hook liberando o que o teste reprova.
+3. **Ele só olha o que está ENTRANDO.** No `Write` isso é o arquivo inteiro; no
+   `Edit`, apenas o trecho novo. Julgar o arquivo inteiro num `Edit` faria toda
+   alteração em `mocks/` ou em código legado ser recusada por algo que já
+   estava lá.
+
+**Como exercitá-lo sem depender do agente** (o contrato é JSON na entrada
+padrão; saída 2 bloqueia):
+
+```bash
+echo '{"tool_name":"Write","tool_input":{"file_path":"src/features/x.tsx","content":"await fetch(\"/api\")"}}'   | node .claude/hooks/guarda-regras.mjs; echo "saida=$?"
+```
+
+Se ele disparou durante o desenvolvimento, e o que aconteceu, está no
+[`registro-de-verificacao.md`](registro-de-verificacao.md).

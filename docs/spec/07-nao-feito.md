@@ -42,6 +42,22 @@ tipos, servir o filtro no mock e só então construir a tela com o estado vazio.
 Até a rodada de 01/09 este parágrafo dizia que o contrato "já existe"; não
 existia. Corrigido em [D-10](08-divergencias.md).
 
+### A validação de formato no SERVIDOR — a outra metade da ADR-015
+**Não feita, e é a metade que fecha o buraco.**
+
+O cliente agora valida CPF, CNPJ e data por regra própria, independente do
+modelo, e **marca** o campo. O que ele não faz é **mudar o estado do
+documento**: um documento já `PRONTO` com CPF inválido continua `PRONTO`, e
+esta interface não o traz de volta para a fila.
+
+*Por quê:* a transição de estado é do servidor (Trilha A). Fazê-la no cliente
+criaria duas máquinas de estado divergentes — exatamente o que a ADR-005 e
+`entities/documento/estado.ts` existem para evitar.
+
+*Custo para fazer:* baixo, e no lugar certo — a mesma regra rodando antes do
+portão de estado no servidor. **A regra já está escrita e testada em domínio
+puro**, sem React e sem rede, justamente para poder ser levada.
+
 ### Upload retomável
 Um arquivo de 8 MB que falha aos 90% recomeça do zero.
 

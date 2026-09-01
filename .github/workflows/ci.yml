@@ -1,0 +1,51 @@
+name: CI
+
+# Existe por causa da D-09: o texto afirmava que a guarda de arquitetura
+# "falha o build", e o build era apenas `tsc -b && vite build`. Quem rodasse
+# só o build não via guarda nenhuma. Agora a afirmação tem lastro.
+on:
+  push:
+    branches: ["**"]
+  pull_request:
+
+jobs:
+  verificar:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: npm
+
+      # `npm ci` e nao `npm install`: instala exatamente o lock, que e o que o
+      # README manda outra pessoa rodar.
+      - run: npm ci
+
+      - name: Linter (fecha a D-08)
+        run: npm run lint
+
+      - name: Tipos em modo estrito
+        run: npm run typecheck
+
+      # As guardas de arquitetura (nenhum tipo de documento no front, uma unica
+      # costura de rede, entities puro) vivem aqui dentro. E este passo que faz
+      # a regra 2 do CLAUDE.md deixar de depender de boa vontade.
+      - name: Testes
+        run: npm test
+
+      # O README afirma que os tipos sao GERADOS do contrato e nunca escritos a
+      # mao (regra 1). Ate aqui isso era honra; agora e verificado: se alguem
+      # editar types.gen.ts sem tocar no openapi.yaml, ou mudar o contrato sem
+      # regerar, o diff nao vem vazio e a CI cai.
+      - name: Os tipos correspondem ao contrato
+        run: |
+          npm run gen:api
+          if ! git diff --exit-code -- src/shared/api/types.gen.ts; then
+            echo "::error file=src/shared/api/types.gen.ts::Os tipos gerados divergem de docs/spec/openapi.yaml. Rode 'npm run gen:api' e faca commit do resultado."
+            exit 1
+          fi
+
+      - name: O projeto compila
+        run: npm run build

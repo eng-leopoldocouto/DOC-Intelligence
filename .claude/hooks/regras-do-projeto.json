@@ -1,0 +1,24 @@
+{
+  "_leia": "Fonte unica das duas regras mecanicas do projeto. Consumida por .claude/hooks/guarda-regras.mjs (bloqueia a escrita) e por tests/arquitetura/fronteiras.test.ts (falha a CI). Duas copias divergiriam em silencio; por isso ha um teste que compara as duas leituras.",
+  "regra2_tiposDeDocumentoProibidos": {
+    "porque": "CLAUDE.md regra 2, ADR-008, fato (f): o front-end nao conhece nenhum tipo de documento. Rotulos, campos, mascaras, ordem e obrigatoriedade vem de GET /tipos-documento. Um 'if' com o nome de um tipo transforma toda mudanca de prompt em ciclo de desenvolvimento.",
+    "ondeVale": "src/, exceto src/mocks/",
+    "atencao": "CPF e CNPJ NAO estao nesta lista. Sao TIPOS DE DADO, e o registry existe para conhece-los. A distincao entre tipo de dado e tipo de documento e o ponto inteiro da ADR-008.",
+    "termos": [
+      "RG",
+      "carteira_de_identidade",
+      "carteiraDeIdentidade",
+      "comprovante",
+      "contracheque",
+      "procuracao",
+      "procuração",
+      "carteira_trabalho",
+      "laudo"
+    ]
+  },
+  "regra3_redeSoEmUmLugar": {
+    "porque": "CLAUDE.md regra 3, ADR-002: uma unica costura de rede. Um fetch solto num componente escapa da politica de retry, do cabecalho de identidade e da sanitizacao de erro — e a politica de retry e o que impede repetir uma chamada COBRADA (fato a).",
+    "ondeVale": "src/, exceto src/shared/api/",
+    "padrao": "fetch("
+  }
+}

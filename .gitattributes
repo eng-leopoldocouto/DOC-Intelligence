@@ -1,0 +1,23 @@
+# Normalizacao de fim de linha.
+#
+# O repositorio e desenvolvido no Windows com core.autocrlf=true, e a CI roda
+# no Linux. Um dos passos da CI regenera os tipos do contrato e FALHA se o diff
+# nao vier vazio — um passo que depende de os dois sistemas concordarem sobre
+# quebra de linha.
+#
+# Hoje eles concordam: o openapi-typescript grava LF nos dois, e o blob
+# commitado ja esta em LF (verificado antes de escrever este arquivo). Este
+# .gitattributes NAO conserta um defeito existente: ele impede que a
+# concordancia dependa de sorte, do valor de autocrlf na maquina de quem clona,
+# ou de uma versao futura do gerador que passe a usar a quebra do sistema.
+#
+# Registro a motivacao assim porque a primeira versao deste comentario afirmava
+# ter encontrado a CI quebrada — e a medicao que sustentava a afirmacao estava
+# errada. Ver o registro de verificacao.
+* text=auto eol=lf
+
+# Binarios das capturas e dos documentos ficticios ficam de fora.
+*.png binary
+*.jpg binary
+*.jpeg binary
+*.pdf binary

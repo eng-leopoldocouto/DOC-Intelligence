@@ -1,5 +1,10 @@
 # DOC Intelligence — interface do atendimento
 
+[![CI](https://github.com/eng-leopoldocouto/DOC-Intelligence/actions/workflows/ci.yml/badge.svg)](https://github.com/eng-leopoldocouto/DOC-Intelligence/actions/workflows/ci.yml)
+![Testes](https://img.shields.io/badge/testes-95-brightgreen)
+![Typecheck](https://img.shields.io/badge/typescript-estrito-blue)
+![Lint](https://img.shields.io/badge/oxlint-0%20avisos-brightgreen)
+
 **Trilha B (front-end)** · Questão prático-subjetiva LAMARCK · Leopoldo Couto
 
 Serviço de inteligência documental para um escritório de advocacia. Documentos
@@ -8,6 +13,29 @@ campos; quando a máquina não tem confiança, uma pessoa confere.
 
 Esta entrega é **a interface do atendimento e o contrato da API** — que ainda não
 existe, é meu para definir, e é servido por mock.
+
+---
+
+## As duas telas que valem a leitura
+
+**A conferência: o documento original ao lado dos campos extraídos.** A foto está
+torta porque veio do celular do atendimento (fato b) — daí os controles de girar
+e ampliar. Cada campo carrega a confiança do modelo, e o CPF traz o aviso do
+**segundo portão**: o modelo declara 96% e o dígito verificador não fecha
+([ADR-015](docs/adr/015-segundo-sinal-de-confianca.md)).
+
+![Tela de conferência: à esquerda a foto torta de uma carteira de identidade fictícia, com marca d'água "documento fictício"; à direita os campos extraídos, cada um com seu aviso de confiança, e o CPF marcado em vermelho com o texto "O modelo confia (96%), o formato não fecha".](docs/img/conferencia.png)
+
+**O conflito entre dois conferentes.** Ana e Bruno abriram o mesmo documento; Bruno
+salvou primeiro. A gravação da Ana **não é descartada nem sobrescrita** — o
+diálogo nomeia quem alterou, mostra os campos divergentes lado a lado e devolve
+a decisão para a pessoa ([ADR-009](docs/adr/009-concorrencia-na-fila.md), fato g).
+
+![Diálogo modal sobre a tela de conferência, com o título "Bruno Lima alterou este documento enquanto você editava" e uma tabela de três colunas — campo, o que você digitou, o que está salvo — com duas linhas divergentes.](docs/img/conflito.png)
+
+Todos os dados das capturas são fictícios e gerados por script: nomes
+inequivocamente falsos, CPF `000.000.000-00` (inválido pelo dígito verificador) e
+marca d'água em cada documento.
 
 ---
 
@@ -91,14 +119,18 @@ os dois modos de falha do fato (a) apareçam sem depender de sorte.
 
 | Comando | O que faz |
 |---|---|
-| `npm test` | 64 testes, incluindo as guardas de arquitetura |
-| `npm run typecheck` | TypeScript estrito (não há `lint` — ver [D-08](docs/spec/08-divergencias.md)) |
+| `npm test` | 95 testes, incluindo as guardas de arquitetura |
+| `npm run typecheck` | TypeScript estrito |
+| `npm run lint` | oxlint, zero avisos ([D-08](docs/spec/08-divergencias.md), fechada) |
 | `npm run build` | Build de produção |
 | `npm run mock` | Serve o contrato em `http://localhost:8787/api/v1` |
 | `npm run gen:api` | Regenera os tipos a partir de `docs/spec/openapi.yaml` |
 | `npm run fixtures` | Regera os documentos fictícios (Python + Pillow) |
 
-O contrato pode ser exercitado sem a interface:
+O contrato pode ser exercitado **sem abrir a interface** —
+[`docs/spec/exemplos.http`](docs/spec/exemplos.http) traz nove requisições
+prontas, cada uma dizendo qual fato do ambiente ela demonstra, incluindo o
+envio duplicado e o `PATCH` com `If-Match` velho que produz o 409:
 
 ```bash
 npm run mock
@@ -138,8 +170,10 @@ docs/ia/         prompts, verificações, tempo real, transcrição da sessão
 docs/enunciado.md
 fixtures/        documentos fictícios e como regerá-los
 src/             a fatia vertical
-tests/           64 testes, incluindo guardas de arquitetura
+tests/           95 testes, incluindo guardas de arquitetura
 .claude/agents/  o subagente auditor, autorado para esta prova
+.claude/hooks/   o hook que BLOQUEIA a escrita que quebraria as regras 2 e 3
+.github/         a CI que faz as guardas falharem o build de verdade
 ```
 
 ```

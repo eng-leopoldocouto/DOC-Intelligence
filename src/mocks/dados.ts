@@ -362,7 +362,12 @@ export function semear(): void {
   const receitas: { tipoId: string; nomeOrigem: string; destino: EstadoDocumento; minutos: number }[] = [
     // O primeiro da fila é o TORTO, de propósito: quem abrir a conferência
     // encontra logo o caso que exige girar a imagem (fato b).
-    { tipoId: 'rg', nomeOrigem: RG_TORTO, destino: 'AGUARDANDO_CONFERENCIA', minutos: 55 },
+    //
+    // E ele espera há 72 minutos, também de propósito: acima do limite de
+    // `entities/documento/fila.ts`, para que o destaque de fila tensa apareça
+    // na demonstração em vez de existir só no código (fato e). Era 55 min, e a
+    // consequência de 55 era que o mecanismo ficava indemonstrável.
+    { tipoId: 'rg', nomeOrigem: RG_TORTO, destino: 'AGUARDANDO_CONFERENCIA', minutos: 72 },
     { tipoId: 'contracheque', nomeOrigem: CONTRACHEQUE, destino: 'AGUARDANDO_CONFERENCIA', minutos: 48 },
     { tipoId: 'comprovante-residencia', nomeOrigem: COMPROVANTE, destino: 'AGUARDANDO_CONFERENCIA', minutos: 41 },
     { tipoId: 'procuracao', nomeOrigem: PROCURACAO, destino: 'AGUARDANDO_CONFERENCIA', minutos: 33 },
@@ -396,14 +401,27 @@ export function semear(): void {
       motivoFalha: null,
       _latenciaMs: 0,
       _destino: r.destino,
-      _camposFinais: falha ? [] : VALORES[tipo.id]!().map((c) => ({
-        ...c,
-        // Confiança coerente com o destino, para o portão de confiança ficar
-        // visível na tela em vez de depender de sorte.
-        confianca: r.destino === 'AGUARDANDO_CONFERENCIA'
-          ? entre(0.4, limiar - 0.02)
-          : entre(limiar, 0.99),
-      })),
+      _camposFinais: falha ? [] : VALORES[tipo.id]!().map((c) => {
+        const tipoDeDado = tipo.campos.find((d) => d.chave === c.chave)?.tipoDeDado
+        const ehIdentificador = tipoDeDado === 'CPF' || tipoDeDado === 'CNPJ'
+        return {
+          ...c,
+          // Confiança coerente com o destino, para o portão de confiança ficar
+          // visível na tela em vez de depender de sorte.
+          //
+          // EXCETO em CPF e CNPJ, que recebem confiança ALTA de propósito. O
+          // valor semeado é 000.000.000-00, inválido pelo dígito verificador
+          // desde o começo (para não parecer dado real) — e é essa combinação,
+          // alta confiança com formato que não fecha, que a ADR-015 existe para
+          // pegar. Sem isto o segundo portão só apareceria como redundância do
+          // primeiro, e o caso que importa ficaria indemonstrável.
+          confianca: ehIdentificador
+            ? entre(limiar + 0.05, 0.99)
+            : r.destino === 'AGUARDANDO_CONFERENCIA'
+              ? entre(0.4, limiar - 0.02)
+              : entre(limiar, 0.99),
+        }
+      }),
       _confiancaFinal: falha ? null : r.destino === 'AGUARDANDO_CONFERENCIA'
         ? entre(0.5, limiar - 0.01)
         : entre(limiar, 0.99),

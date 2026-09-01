@@ -60,6 +60,16 @@ describe('o painel diz POR QUE o campo está ali', () => {
     expect(screen.getByLabelText(/Documento da pessoa/)).toHaveAttribute('aria-invalid', 'false')
   })
 
+  it('formato inválido COM confiança baixa não mente dizendo que o modelo confia', () => {
+    // O motivo do formato tem precedência, e o texto precisa continuar
+    // verdadeiro quando os dois portões acusam. A primeira versão dizia
+    // "O modelo confia (60%)" — a própria contradição. Achado ao rodar a tela.
+    painel([{ chave: 'documento', valor: CPF_INVALIDO, confianca: 0.6, origem: 'MODELO' }])
+
+    expect(screen.getByText(/Confiança baixa \(60%\) e o formato não fecha/i)).toBeInTheDocument()
+    expect(screen.queryByText(/o modelo confia/i)).not.toBeInTheDocument()
+  })
+
   it('campo em ordem: nada é destacado quando os dois portões passam', () => {
     painel([{ chave: 'documento', valor: CPF_VALIDO, confianca: 0.97, origem: 'MODELO' }])
 

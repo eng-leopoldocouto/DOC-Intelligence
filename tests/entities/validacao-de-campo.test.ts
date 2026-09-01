@@ -20,7 +20,7 @@ const CNPJ_VALIDO = '11222333000181'
 const CNPJ_INVALIDO = '11222333000182'
 
 const LIMIAR = 0.85
-const campo = (valor: string | null, confianca: number | null, origem: 'MODELO' | 'HUMANO' = 'MODELO'): CampoExtraido =>
+const campo = (valor: string | null, confianca: number, origem: 'MODELO' | 'HUMANO' = 'MODELO'): CampoExtraido =>
   ({ chave: 'x', valor, confianca, origem })
 
 describe('dígito verificador — a aritmética que não depende do fornecedor', () => {
@@ -98,6 +98,13 @@ describe('motivoDeConferencia — os dois casos que importam', () => {
   })
 
   it('confiança AUSENTE continua contando como insuficiente', () => {
-    expect(motivoDeConferencia(campo(CPF_VALIDO, null), 'CPF', LIMIAR)).toBe('CONFIANCA_BAIXA')
+    // O contrato declara `CampoExtraido.confianca` como number NÃO anulável, e
+    // por isso este caso não deveria existir. A defesa em `precisaConferencia`
+    // é deliberada mesmo assim: tratar ausência como confiança alta deixaria
+    // documento não processado passar por pronto, que é o modo de falha mais
+    // caro deste sistema porque é silencioso. O molde abaixo força o caso que o
+    // tipo proíbe, para provar que a defesa está de pé e não é comentário.
+    const semConfianca = { chave: 'x', valor: CPF_VALIDO, confianca: null, origem: 'MODELO' } as unknown as CampoExtraido
+    expect(motivoDeConferencia(semConfianca, 'CPF', LIMIAR)).toBe('CONFIANCA_BAIXA')
   })
 })

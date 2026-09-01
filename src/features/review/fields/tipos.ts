@@ -16,6 +16,13 @@ export type PropsDeCampo = {
    * conferir o campo errado (ADR-015).
    */
   motivo: MotivoDeConferencia | null
+  /**
+   * O limiar do TIPO, vindo da API (ADR-008). Chega até aqui por um motivo só:
+   * um campo pode reprovar no formato E ter confiança baixa ao mesmo tempo, e o
+   * aviso precisa dizer a verdade nos dois casos. Sem isto, o texto afirmava
+   * "o modelo confia (60%)" — que é a própria contradição.
+   */
+  limiar: number
   onChange: (valor: string) => void
 }
 

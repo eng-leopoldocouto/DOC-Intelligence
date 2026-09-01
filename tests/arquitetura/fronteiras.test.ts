@@ -35,26 +35,58 @@ const TODAS = fontes()
  * As regras valem para CÓDIGO. Comentário que explica o domínio é desejável, e
  * um teste que o pune ensina a apagar explicação — o oposto do que queremos.
  */
-const conteudo = (f: string) =>
-  readFileSync(f, 'utf8')
+const conteudoDeTexto = (t: string): string =>
+  t
     .replace(/\/\*[\s\S]*?\*\//g, ' ')
     .replace(/\/\/.*$/gm, ' ')
+
+const conteudo = (f: string) => conteudoDeTexto(readFileSync(f, 'utf8'))
 const rel = (f: string) => relative(process.cwd(), f).split(sep).join('/')
 const foraDoMock = (f: string) => !rel(f).includes('/mocks/')
+
+/**
+ * A lista de termos NÃO vive neste arquivo.
+ *
+ * Ela vive em `.claude/hooks/regras-do-projeto.json`, lida também pelo hook
+ * PreToolUse que BLOQUEIA a escrita antes que ela aconteça. Duas cópias — uma
+ * no hook, outra no teste — divergiriam em silêncio, e a divergência apareceria
+ * do pior jeito: o hook liberando o que o teste reprova, ou o contrário.
+ *
+ * O hook chega antes e explica; este teste chega depois e não deixa passar. Os
+ * dois só têm valor se falarem da mesma lista.
+ */
+const REGRAS = JSON.parse(
+  readFileSync(join(process.cwd(), '.claude/hooks/regras-do-projeto.json'), 'utf8'),
+) as { regra2_tiposDeDocumentoProibidos: { termos: string[] } }
 
 describe('G1 — o front-end não conhece nenhum tipo de documento (ADR-008, fato f)', () => {
   it('nenhum nome de tipo de documento aparece fora de mocks/', () => {
     // Atenção: CPF e CNPJ NÃO entram nesta lista. São TIPOS DE DADO, e o
     // registry existe justamente para conhecê-los. A distinção entre tipo de
     // dado e tipo de documento é o ponto inteiro da ADR-008.
-    const proibidos =
-      /\b(RG|carteira_de_identidade|carteiraDeIdentidade|comprovante|contracheque|procuracao|procuração|carteira_trabalho|laudo)\b/i
+    const termos = REGRAS.regra2_tiposDeDocumentoProibidos.termos
+    expect(termos.length).toBeGreaterThan(0) // guarda contra o teste virar vácuo
+
+    const proibidos = new RegExp(`\\b(${termos.join("|")})\\b`, 'i')
 
     const infratores = TODAS.filter(foraDoMock)
       .filter((f) => proibidos.test(conteudo(f)))
       .map(rel)
 
     expect(infratores).toEqual([])
+  })
+
+  it('o hook PreToolUse lê a MESMA lista — não guarda uma cópia própria', () => {
+    // Se alguém colar os termos dentro do .mjs, o hook e este teste passam a
+    // poder discordar. O hook precisa continuar LENDO o json, e não contê-lo.
+    const hook = readFileSync(join(process.cwd(), '.claude/hooks/guarda-regras.mjs'), 'utf8')
+    const semComentario = conteudoDeTexto(hook)
+
+    expect(semComentario).toContain('regras-do-projeto.json')
+    for (const termo of REGRAS.regra2_tiposDeDocumentoProibidos.termos) {
+      expect(semComentario).not.toContain(`'${termo}'`)
+      expect(semComentario).not.toContain(`"${termo}"`)
+    }
   })
 })
 

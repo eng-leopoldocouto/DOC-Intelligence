@@ -10,7 +10,10 @@ export async function executarComConcorrencia<T>(
   tarefas: (() => Promise<T>)[],
   maximo: number = CONCORRENCIA_MAXIMA,
 ): Promise<PromiseSettledResult<T>[]> {
-  const resultados = new Array<PromiseSettledResult<T>>(tarefas.length)
+  // `Array.from` e não `new Array(n)`: o linter recusa a segunda forma por
+  // ambiguidade entre tamanho e elemento único. Aqui as duas produzem o mesmo
+  // resultado, porque todo índice é escrito pelos trabalhadores abaixo.
+  const resultados = Array.from<PromiseSettledResult<T>>({ length: tarefas.length })
   let proxima = 0
 
   const trabalhador = async (): Promise<void> => {

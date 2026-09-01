@@ -43,10 +43,27 @@ Três, e as três atacam a interface:
 - A tela de acompanhamento mostra **tempo decorrido**, não barra de progresso
   falsa. Não sabemos a porcentagem; fingir que sabemos é mentir para o operador.
 
+### Acrescentado em 01/09 — um segundo sinal, que não é do fornecedor
+
+O portão de confiança tinha uma perna só, e ela era **autodeclarada**: a
+pontuação que o próprio produtor do resultado atribui ao próprio resultado.
+Consequência concreta: um **CPF inválido pelo dígito verificador, com confiança
+0,97, entrava como `PRONTO`** e o erro só aparecia semanas depois, num sistema
+que rejeitasse o número.
+
+`entities/documento/validacao-de-campo.ts` acrescenta uma verificação que **não
+depende do fornecedor** — CPF e CNPJ por dígito verificador, DATA por
+plausibilidade — dirigida por `tipoDeDado`, nunca por tipo de documento
+([ADR-015](../adr/015-segundo-sinal-de-confianca.md)). Um campo que reprova vai
+para conferência mesmo com confiança alta, e o painel diz por quê.
+
+Isto também é tratamento do fato (f): quando o fornecedor for trocado, a escala
+da confiança muda; o dígito verificador continua valendo.
+
 ### Onde vive
 
 `shared/api/http.ts` (política de retry) · `features/processing/` ·
-`entities/documento/estado.ts`
+`entities/documento/estado.ts` · `entities/documento/validacao-de-campo.ts`
 
 ### Risco residual
 
@@ -54,6 +71,12 @@ Se a taxa de falha do fornecedor subir muito, a fila de `FALHOU` cresce sem que
 ninguém seja avisado. **Não implementamos alerta de taxa de falha** — só o
 estado individual. Gatilho para tratar: primeira semana com mais de 5% de
 `FALHOU`.
+
+**Risco residual do segundo portão:** ele **marca o campo, e não muda o estado
+do documento**. Um documento já `PRONTO` com CPF inválido continua `PRONTO` —
+mover estado é do servidor, e inventar essa transição no cliente criaria duas
+máquinas de estado divergentes. Só três dos seis tipos de dado têm regra.
+**Registrado, não resolvido.**
 
 ---
 
@@ -82,9 +105,25 @@ recusa um documento perfeitamente legível porque não consegue lê-lo.
   origem ("como chegou"), lado a lado com o nome padronizado proposto. A
   identidade do documento é o hash do conteúdo.
 
+### Decisão sobre a INTERFACE — acrescentada em 01/09
+
+Até 01/09 o tratamento deste fato cobria **o arquivo** e não cobria **a pessoa**.
+Havia uma única *media query* em toda a folha de estilos, e as telas de envio e
+acompanhamento estouravam num aparelho de 360 px: barra transbordando, botões
+saindo pela direita, alvos de toque de 35 px de altura. O fato (b) fala de um
+celular, e nós tínhamos lido só o JPEG que sai dele.
+
+- **Enviar e acompanhar funcionam a 360 px**: alvos de 44 px, sem rolagem
+  horizontal, linha de item que quebra em duas em vez de estourar.
+- **A conferência permanece uma tela de computador, por decisão declarada**
+  ([ADR-014](../adr/014-enviar-e-movel-conferir-e-desktop.md)) — o documento ao
+  lado dos campos é a razão de ser dela, e empilhado ela deixa de cumprir a
+  função. Abaixo de 760 px a própria tela diz isso, em vez de degradar calada.
+
 ### Onde vive
 
-`shared/lib/imagem.ts` · `features/upload/validacao.ts`
+`shared/lib/imagem.ts` · `features/upload/validacao.ts` ·
+`shared/ui/estilos.css` (faixa de 760 px)
 
 ### Risco residual — **assumido conscientemente**
 
@@ -98,6 +137,15 @@ atendimento a ajustar a câmera para "Mais compatível" nos ajustes do iPhone.
 É uma solução organizacional para um problema técnico — funciona, mas depende
 de treinamento, e treinamento se perde na rotatividade. **Primeiro candidato a
 tratar depois da entrega.**
+
+**Segundo risco residual, novo: a responsividade foi verificada no navegador, e
+não em aparelho.** Redimensionei para 360 × 800 e conferi por medição — sem
+rolagem horizontal, nenhum elemento ultrapassando a largura, nenhum alvo de
+toque abaixo de 44 px. Três coisas só aparecem no aparelho de verdade e **não
+foram verificadas**: o teclado virtual cobrindo o campo em foco, o gesto de
+toque em alvos próximos, e o **zoom automático do iOS ao focar um campo com
+fonte menor que 16 px** — este último é um defeito conhecido do nosso CSS, que
+usa 14 px nos campos. Registrado, não resolvido.
 
 ---
 
@@ -208,14 +256,34 @@ rede, **brutal para a interface**, em três pontos:
 `features/processing/usePollingLote.ts` · `features/upload/filaDeEnvio.ts` ·
 `features/review/ListaVirtualizada.tsx`
 
+### Acrescentado em 01/09 — a fila diz o próprio tamanho
+
+O cabeçalho da fila de conferência mostra **quantos aguardam** e **há quanto
+tempo espera o mais antigo**, com destaque visual acima de um limite. Os dois
+limites saem dos números do próprio enunciado: quatro minutos por documento e
+duas pessoas conferindo dão cerca de **30 documentos por hora** de vazão — daí
+`LIMITE_DE_ITENS = 30` e `LIMITE_DE_ESPERA_MIN = 60` em
+`entities/documento/fila.ts`, que traz a derivação por escrito.
+
+A contagem é honesta sobre o que sabe: com paginação por cursor, a interface
+conhece o que foi carregado, e por isso escreve **"50+"** e não "50". Já a
+espera do mais antigo é exata, porque a fila chega ordenada por chegada.
+
 ### Risco residual
 
-Não há **priorização** na fila: se às 11h existem 800 documentos aguardando
-conferência e duas pessoas conferindo, a fila não drena no mesmo dia — e nada na
-UI indica isso ao gestor. Contrapressão e priorização (por tipo, por urgência,
-por cliente) exigiriam saber se há SLA de mesmo dia, que é a **dúvida P2 não
-respondida**. Assumimos que não há. **Se houver, esta é a primeira coisa a
-construir.**
+**Continua não havendo priorização, e a interface continua não sabendo drenar
+fila.** O que ela faz agora é parar de esconder o problema — que é diferente de
+resolvê-lo, e é o máximo que um front-end pode fazer aqui: a fila drena
+contratando gente ou baixando o volume que entra, e as duas são decisões de
+gestão. Contrapressão e priorização (por tipo, por urgência, por cliente)
+exigiriam saber se há SLA de mesmo dia, que é a **dúvida P2 não respondida**.
+Assumimos que não há. **Se houver, esta é a primeira coisa a construir.**
+
+**Risco residual do próprio aviso:** os dois limites estão no código do
+front-end, e deveriam vir do servidor ao lado de `limiarConfiancaPadrao`, pelo
+mesmo motivo do fato (f) — o escritório vai contratar mais gente, ou menos, e
+recalibrar isso não pode custar um deploy. Não os movi para o contrato nesta
+rodada. **Registrado, não resolvido.**
 
 ---
 
@@ -318,10 +386,10 @@ procurar. Comportamento de degradação documentado, não acidental.
 
 | Fato | Resolvido | Registrado como risco |
 |---|---|---|
-| (a) modelo lento, caro, instável | Assíncrono, estados de falha, sem retry automático | Alerta de taxa de falha |
-| (b) foto de celular, nome lixo | Validação, redução, EXIF, hash como identidade | **HEIC do iPhone** |
+| (a) modelo lento, caro, instável | Assíncrono, estados de falha, sem retry automático, **segundo portão independente do modelo** | Alerta de taxa de falha; só 3 tipos de dado validados |
+| (b) foto de celular, nome lixo | Validação, redução, EXIF, hash como identidade, **envio e acompanhamento a 360 px** | **HEIC do iPhone**; zoom do iOS; não verificado em aparelho real |
 | (c) duplicatas | Hash SHA-256 em duas camadas | Duplicata perceptual do mesmo papel |
 | (d) dado sensível | Lista do que não guardamos, mascaramento | Trilha de auditoria de leitura |
-| (e) pico de 800 | Polling em lote, backoff, virtualização, concorrência | **Priorização e contrapressão** |
+| (e) pico de 800 | Polling em lote, backoff, concorrência, **pressão da fila visível no cabeçalho** | **Priorização e contrapressão**; limites no cliente, não no contrato |
 | (f) troca de modelo/prompt | Schema vindo da API, registry de campos | Tipo de dado novo exige componente |
 | (g) dois conferentes | Claim com TTL **e** trava otimista | Degradação sem identidade do host |
