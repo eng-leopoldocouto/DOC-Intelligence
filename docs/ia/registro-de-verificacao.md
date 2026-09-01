@@ -207,3 +207,78 @@ correção anterior não o atualizou, violando a regra 6 do `CLAUDE.md` — a qu
 que estes registros "não podem ser reconstruídos no fim". Ela tinha razão. Esta
 entrada foi escrita depois dos fatos que descreve, e não no momento deles. Fica
 declarado.
+
+---
+
+## V-008 — 01/09/2026, manhã · Auditoria externa: o hook disparou, e abrir a tela achou três defeitos meus
+
+Uma auditoria **externa a este repositório** devolveu uma lista em quatro blocos.
+O prompt está íntegro em
+[`prompts/0014`](prompts/0014-2026-09-01-auditoria-externa-defeitos.md).
+
+### O que verifiquei, rodando
+
+| Verificação | Comando | Resultado |
+|---|---|---|
+| Base antes de mexer | `npm run typecheck && npm test` | limpo, **64 testes** |
+| Depois de tudo | `npm run typecheck && npm run lint && npm test` | limpo, **0 avisos**, **95 testes** |
+| O linter não é vácuo | violação deliberada em `fila.ts` | saída **1**; removida, saída **0** |
+| O passo de CI dos tipos | `npm run gen:api && git diff --exit-code` | diff **vazio** |
+| O hook bloqueia | JSON na entrada padrão, cinco casos | `fetch(` fora de `shared/api/` → **2**; dentro → 0; tipo de documento em `features/` → **2**; em `mocks/` → 0; **em comentário → 0** |
+| A fatia continua de pé | `exemplos.http` inteiro contra `npm run mock` | 202 no envio, 200 `duplicado:true` no reenvio, 409 no claim do segundo, 409 no `If-Match` velho com `alteradoPor` |
+| 360 px | navegador em 360 × 800, medindo | sem rolagem horizontal, **0** elementos ultrapassando a largura, **0** alvos de toque abaixo de 44 px |
+
+### O hook disparou? Sim — e o interessante é *quando*
+
+**Disparou nos testes que fiz de propósito, e não durante o desenvolvimento.**
+Isso é informação, não decepção: nesta rodada eu não escrevi nada que quebrasse
+as regras 2 ou 3, porque o trabalho foi de acessibilidade, CSS e validação de
+formato — nenhum deles pede rede nova nem nome de tipo de documento.
+
+O caso que mais me interessou foi o **quinto**: um arquivo cujo comentário cita
+`fetch(` e `RG`, que **passa**. Se ele não passasse, o hook estaria ensinando a
+apagar explicação — e o teste de arquitetura já tinha aprendido essa lição do
+jeito difícil (V-004). Um hook que repete um erro que o repositório já corrigiu
+uma vez é pior que hook nenhum.
+
+### Onde o agente errou desta vez — três vezes, e nenhuma foi pega por teste
+
+**1. O aviso do segundo portão mentia.** O agente escreveu o texto *"O modelo
+confia (X%), o formato não fecha"* para todo campo reprovado no formato. Abri a
+tela: o CPF do primeiro documento tinha confiança **60%**, e a interface exibia
+**"O modelo confia (60%)"** — a própria contradição. O motivo de formato tem
+precedência sobre o de confiança, e o texto assumia que só o primeiro estava
+ativo. Nenhum teste pegava, porque todos os testes usavam confiança alta.
+Corrigido, com teste de regressão para o caso dos **dois** portões acusando.
+
+**2. Duas coisas ficaram indemonstráveis.** A fila semeada esperava 55 minutos
+contra um limite de 60, e as confianças semeadas eram todas baixas. Resultado: o
+destaque de fila tensa e o caso principal da ADR-015 existiam no código e
+**nunca apareciam na tela**. Não é defeito de lógica — é pior, é recurso que
+ninguém vê. Ajustei a semeadura, com o porquê escrito dentro do próprio mock,
+pelo mesmo argumento da D-03.
+
+**3. O agente afirmou ter encontrado um defeito que não existia.** Ao escrever o
+`.gitattributes`, ele justificou o arquivo dizendo que a CI falharia sempre no
+Linux por causa de CRLF no blob commitado. A medição que sustentava a afirmação
+era `od -c | grep -c '\\r'` — que, depois de passar pelo shell, virou uma busca
+pela **letra "r"**, e contava linhas quaisquer. O arquivo sempre esteve em LF.
+
+Este é o erro mais instrutivo dos três, porque é o **oposto** dos anteriores:
+não foi omissão, foi um achado inventado com aparência de evidência. Mantive o
+`.gitattributes` — ele é defensável por outro motivo, e está escrito nele qual —
+mas reescrevi a justificativa e registro aqui, porque *"encontrei um problema"*
+sem lastro é a mesma falha das D-06 e D-09, apenas com o sinal trocado.
+
+### A lição que muda o método, de novo
+
+As três rodadas anteriores ensinaram **procurar pelo número, não pelo assunto**.
+Esta acrescenta a segunda metade: **abrir a tela.** Os três erros acima passaram
+por `typecheck`, por `lint`, por 95 testes e pela minha leitura — e os três
+morreram em menos de um minuto de navegador. Teste verifica o que alguém pensou
+em verificar; a tela mostra o que ninguém pensou.
+
+**Ressalva sobre este arquivo, de novo:** esta entrada também foi escrita ao
+final da rodada, e não no momento de cada fato. A diferença para a anterior é
+que agora existe registro intermediário — os commits `c37136c`, `4f88de3` e
+`78058bf` carimbam cada bloco, e as saídas coladas acima são as reais.

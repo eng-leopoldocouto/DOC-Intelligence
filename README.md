@@ -80,9 +80,9 @@ npm run gen:api             # regenera os tipos do OpenAPI: o diff sai vazio
 | Peso | Critério | Onde ler |
 |---|---|---|
 | **30%** | Arquitetura e modularidade — *"o que acontece quando uma peça precisa ser trocada"* | [`04-arquitetura.md`](docs/spec/04-arquitetura.md): **seis costuras nomeadas**, cada uma com o custo real da troca. A resposta central: adicionar um tipo de documento novo custa **zero linhas de front-end** ([ADR-008](docs/adr/008-campos-dirigidos-por-schema.md)) |
-| **20%** | Rastreabilidade das decisões | [`docs/adr/`](docs/adr/) — 13 decisões, cada uma com as alternativas descartadas **pelo motivo real** e uma seção *"como saberemos que erramos"*. Decisão sem critério de refutação é preferência pessoal com aparência de engenharia |
-| **20%** | Uso de IA como ferramenta de engenharia | [`docs/ia/`](docs/ia/) — prompts íntegros, **registro de verificação com sete entradas**, transcrição completa da sessão, e o parágrafo sobre [onde o agente errou](docs/ia/onde-o-agente-errou.md). O ciclo de auditoria está em [`V-007`](docs/ia/registro-de-verificacao.md) |
-| **15%** | Especificação e método | [`docs/spec/`](docs/spec/) congelada na tag `spec-v1`, 28 minutos antes do primeiro arquivo em `src/`. As **nove divergências** posteriores estão em [`08-divergencias.md`](docs/spec/08-divergencias.md) |
+| **20%** | Rastreabilidade das decisões | [`docs/adr/`](docs/adr/) — 15 decisões, cada uma com as alternativas descartadas **pelo motivo real** e uma seção *"como saberemos que erramos"*. Decisão sem critério de refutação é preferência pessoal com aparência de engenharia |
+| **20%** | Uso de IA como ferramenta de engenharia | [`docs/ia/`](docs/ia/) — prompts íntegros, registro de verificação, transcrição completa da sessão e das **quatro auditorias**, e o parágrafo sobre [onde o agente errou](docs/ia/onde-o-agente-errou.md). Além do `CLAUDE.md` e do subagente auditor, um **hook que bloqueia a escrita** que quebraria as regras 2 e 3 — a regra deixa de depender de boa vontade ([`docs/ia/README.md`](docs/ia/README.md)) |
+| **15%** | Especificação e método | [`docs/spec/`](docs/spec/) congelada na tag `spec-v1`, 28 minutos antes do primeiro arquivo em `src/`. As **onze divergências** posteriores estão em [`08-divergencias.md`](docs/spec/08-divergencias.md), duas delas fechadas nesta rodada. O contrato é exercitável sem a interface: [`exemplos.http`](docs/spec/exemplos.http) |
 | **15%** | Atenção e proatividade | [`05-fatos-do-ambiente.md`](docs/spec/05-fatos-do-ambiente.md) e as **seis premissas** que assumi no lugar das dúvidas que não houve tempo de enviar ([`00-visao-e-escopo.md`](docs/spec/00-visao-e-escopo.md)) |
 
 ---
@@ -275,10 +275,21 @@ repositório afirmam praticar.
 - **A fila pagina por cursor, mas não é virtualizada** — a spec prometia as duas
   coisas ([D-06](docs/spec/08-divergencias.md)).
 - **Sem bloqueio por inatividade** na conferência ([D-07](docs/spec/08-divergencias.md)).
-- **Sem CI** — as guardas de arquitetura rodam em `npm test`, não no build
-  ([D-09](docs/spec/08-divergencias.md)).
 - **HEIC do iPhone é recusado**, com instrução de como contornar. Risco conhecido
   e não resolvido.
+- **A conferência é uma tela de computador, por decisão.** Envio e acompanhamento
+  funcionam a 360 px; a conferência avisa, abaixo de 760 px, que ali se confere
+  pior ([ADR-014](docs/adr/014-enviar-e-movel-conferir-e-desktop.md)). A
+  responsividade foi verificada redimensionando o navegador, **não em aparelho
+  real** — o zoom do iOS ao focar campo com fonte de 14 px é defeito conhecido e
+  não tratado.
+- **O segundo portão marca o campo, e não muda o estado do documento.** Um
+  documento já `PRONTO` com CPF inválido continua `PRONTO`; mover estado é do
+  servidor ([ADR-015](docs/adr/015-segundo-sinal-de-confianca.md),
+  [`07-nao-feito.md`](docs/spec/07-nao-feito.md)).
+- **A pressão da fila conta o que foi carregado**, não o total: com paginação por
+  cursor a interface escreve "50+", e não "50". E os dois limites que acendem o
+  destaque estão no código do cliente, quando deveriam vir do contrato.
 
 ---
 

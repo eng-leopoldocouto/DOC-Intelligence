@@ -14,7 +14,8 @@
     "lint": "oxlint --deny-warnings",
     "gen:api": "openapi-typescript docs/spec/openapi.yaml -o src/shared/api/types.gen.ts",
     "mock": "tsx src/mocks/servidor.ts",
-    "fixtures": "python scripts/gerar-documentos-ficticios.py"
+    "fixtures": "python scripts/gerar-documentos-ficticios.py",
+    "carta:pdf": "python scripts/gerar-carta-pdf.py"
   },
   "dependencies": {
     "@tanstack/react-query": "^5.62.0",
