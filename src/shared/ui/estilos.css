@@ -90,3 +90,83 @@ h1 { font-size: 20px; margin: 0 0 4px; letter-spacing: -.01em; }
 
 .resolucao { font-size: 12px; color: var(--erro); margin-top: 3px; }
 .vazio { padding: 48px 24px; text-align: center; color: var(--tinta-tenue); font-size: 14px; }
+
+/* --- Conferência ---------------------------------------------------------- */
+
+.cabecalho-conferencia {
+  display: flex; align-items: flex-start; justify-content: space-between;
+  gap: 16px; margin-bottom: 16px;
+}
+.cabecalho-conferencia .subtitulo { margin: 0; }
+
+.conferencia {
+  display: grid; grid-template-columns: minmax(0, 1.1fr) minmax(360px, .9fr);
+  gap: 16px; align-items: start;
+}
+@media (max-width: 1000px) { .conferencia { grid-template-columns: 1fr; } }
+
+.visualizador {
+  background: var(--papel); border: 1px solid var(--borda);
+  border-radius: var(--raio); box-shadow: var(--sombra);
+  position: sticky; top: 16px; overflow: hidden;
+}
+.visualizador-barra {
+  display: flex; gap: 6px; align-items: center;
+  padding: 8px; border-bottom: 1px solid var(--borda); background: var(--papel-fundo);
+}
+.visualizador-palco {
+  height: 68vh; overflow: auto; display: grid; place-items: center;
+  background: #33353a; padding: 16px;
+}
+.visualizador-palco img { max-width: 100%; transition: transform .15s; transform-origin: center; }
+.visualizador-pdf { width: 100%; height: 100%; min-height: 60vh; border: 0; background: #fff; }
+
+.lado-campos {
+  background: var(--papel); border: 1px solid var(--borda);
+  border-radius: var(--raio); box-shadow: var(--sombra); padding: 16px;
+}
+.painel-campos { display: flex; flex-direction: column; gap: 14px; margin-top: 14px; }
+
+.campo { display: flex; flex-direction: column; gap: 5px; }
+.campo label { font-size: 13px; font-weight: 550; color: var(--tinta-fraca); }
+.campo .obrigatorio { color: var(--erro); }
+.campo input, .campo select, .campo textarea {
+  padding: 9px 11px; border: 1px solid var(--borda); border-radius: 6px;
+  font-size: 14px; font-family: inherit; background: var(--papel); color: var(--tinta);
+}
+.campo input:focus, .campo select:focus, .campo textarea:focus {
+  outline: 2px solid var(--acento); outline-offset: -1px; border-color: var(--acento);
+}
+/* Campo abaixo do limiar: destacado individualmente, não o documento inteiro */
+.campo.duvidoso input, .campo.duvidoso select { border-color: var(--alerta); background: #fffdf5; }
+.aviso-campo { font-size: 12px; color: var(--alerta); }
+.aviso-humano { font-size: 12px; color: var(--ok); }
+.dica-campo { font-size: 12px; color: var(--tinta-tenue); word-break: break-all; }
+
+.botao-inline {
+  background: none; border: 0; padding: 0; font: inherit; font-size: 12px;
+  color: var(--acento); text-decoration: underline; cursor: pointer;
+}
+
+/* --- Diálogos ------------------------------------------------------------- */
+
+.dialogo-fundo {
+  position: fixed; inset: 0; background: rgba(20, 22, 26, .55);
+  display: grid; place-items: center; padding: 24px; z-index: 50;
+}
+.dialogo {
+  background: var(--papel); border-radius: var(--raio); padding: 24px;
+  max-width: 720px; width: 100%; max-height: 85vh; overflow: auto;
+  box-shadow: 0 12px 48px rgba(0,0,0,.28);
+}
+.dialogo h2 { margin: 0 0 6px; font-size: 17px; }
+.dialogo .campo { margin-top: 14px; }
+.dialogo-acoes { display: flex; gap: 8px; justify-content: flex-end; margin-top: 20px; flex-wrap: wrap; }
+
+.tabela-conflito { width: 100%; border-collapse: collapse; margin-top: 14px; font-size: 13px; }
+.tabela-conflito th, .tabela-conflito td {
+  text-align: left; padding: 8px 10px; border-bottom: 1px solid var(--borda); vertical-align: top;
+}
+.tabela-conflito th { font-size: 12px; color: var(--tinta-fraca); font-weight: 550; }
+.tabela-conflito td.meu { background: var(--acento-fraco); }
+.tabela-conflito td.dele { background: var(--alerta-fraco); }

@@ -32,6 +32,14 @@ export type OpcoesHttp = {
   corpo?: BodyInit | null
   ifMatch?: string
   json?: unknown
+  /**
+   * Mantém a requisição viva depois de a página começar a ser descarregada.
+   *
+   * Necessário para liberar a reserva de conferência no `beforeunload`: um
+   * `fetch` comum é cancelado nesse momento, e a reserva só se soltaria pelo
+   * TTL — cinco minutos de espera a cada aba fechada (fato g).
+   */
+  keepalive?: boolean
 }
 
 const esperar = (ms: number) => new Promise((r) => setTimeout(r, ms))
@@ -99,6 +107,7 @@ export async function http<T>(caminho: string, opcoes: OpcoesHttp = {}): Promise
         method: metodo,
         headers: cabecalhos,
         body: opcoes.json !== undefined ? JSON.stringify(opcoes.json) : opcoes.corpo,
+        ...(opcoes.keepalive ? { keepalive: true } : {}),
       })
 
       if (!resposta.ok) throw await construirErro(resposta)

@@ -350,18 +350,29 @@ export function semear(): void {
 
   const minutosAtras = (m: number) => new Date(Date.now() - m * 60_000).toISOString()
 
+  // Os nomes precisam ser os dos arquivos REAIS em fixtures/documentos-ficticios/,
+  // senão o visualizador da conferência abre vazio — e o documento ao lado dos
+  // campos é justamente a funcionalidade que a tela existe para oferecer.
+  const RG_RETO = 'WhatsApp Image 2026-08-11 at 09.12.33.jpeg'
+  const RG_TORTO = 'IMG_20260811_091247.jpg'
+  const COMPROVANTE = 'scan0001.pdf'
+  const CONTRACHEQUE = 'scan0002.pdf'
+  const PROCURACAO = 'WhatsApp Image 2026-08-11 at 10.02.15.jpeg'
+
   const receitas: { tipoId: string; nomeOrigem: string; destino: EstadoDocumento; minutos: number }[] = [
-    { tipoId: 'rg', nomeOrigem: 'WhatsApp Image 2026-08-11 at 09.03.12.jpeg', destino: 'AGUARDANDO_CONFERENCIA', minutos: 55 },
-    { tipoId: 'contracheque', nomeOrigem: 'scan0007.pdf', destino: 'AGUARDANDO_CONFERENCIA', minutos: 48 },
-    { tipoId: 'comprovante-residencia', nomeOrigem: 'IMG_20260811_091802.jpg', destino: 'AGUARDANDO_CONFERENCIA', minutos: 41 },
-    { tipoId: 'procuracao', nomeOrigem: 'WhatsApp Image 2026-08-11 at 09.22.40.jpeg', destino: 'AGUARDANDO_CONFERENCIA', minutos: 33 },
-    { tipoId: 'rg', nomeOrigem: 'scan0011.pdf', destino: 'AGUARDANDO_CONFERENCIA', minutos: 27 },
-    { tipoId: 'contracheque', nomeOrigem: 'IMG_20260811_094410.jpg', destino: 'AGUARDANDO_CONFERENCIA', minutos: 19 },
-    { tipoId: 'rg', nomeOrigem: 'WhatsApp Image 2026-08-11 at 08.51.07.jpeg', destino: 'PRONTO', minutos: 62 },
-    { tipoId: 'comprovante-residencia', nomeOrigem: 'scan0003.pdf', destino: 'PRONTO', minutos: 58 },
+    // O primeiro da fila é o TORTO, de propósito: quem abrir a conferência
+    // encontra logo o caso que exige girar a imagem (fato b).
+    { tipoId: 'rg', nomeOrigem: RG_TORTO, destino: 'AGUARDANDO_CONFERENCIA', minutos: 55 },
+    { tipoId: 'contracheque', nomeOrigem: CONTRACHEQUE, destino: 'AGUARDANDO_CONFERENCIA', minutos: 48 },
+    { tipoId: 'comprovante-residencia', nomeOrigem: COMPROVANTE, destino: 'AGUARDANDO_CONFERENCIA', minutos: 41 },
+    { tipoId: 'procuracao', nomeOrigem: PROCURACAO, destino: 'AGUARDANDO_CONFERENCIA', minutos: 33 },
+    { tipoId: 'rg', nomeOrigem: RG_RETO, destino: 'AGUARDANDO_CONFERENCIA', minutos: 27 },
+    { tipoId: 'contracheque', nomeOrigem: CONTRACHEQUE, destino: 'AGUARDANDO_CONFERENCIA', minutos: 19 },
+    { tipoId: 'rg', nomeOrigem: RG_RETO, destino: 'PRONTO', minutos: 62 },
+    { tipoId: 'comprovante-residencia', nomeOrigem: COMPROVANTE, destino: 'PRONTO', minutos: 58 },
     // Os dois modos de falha do fato (a), para que ambos apareçam na demonstração.
-    { tipoId: 'rg', nomeOrigem: 'IMG_20260811_090110.jpg', destino: 'FALHOU', minutos: 36 },
-    { tipoId: 'contracheque', nomeOrigem: 'scan0009.pdf', destino: 'EXPIRADO', minutos: 24 },
+    { tipoId: 'rg', nomeOrigem: RG_TORTO, destino: 'FALHOU', minutos: 36 },
+    { tipoId: 'contracheque', nomeOrigem: CONTRACHEQUE, destino: 'EXPIRADO', minutos: 24 },
   ]
 
   for (const r of receitas) {
