@@ -1,9 +1,9 @@
 {
-  "_leia": "Fonte unica das duas regras mecanicas do projeto. Consumida por .claude/hooks/guarda-regras.mjs (bloqueia a escrita) e por tests/arquitetura/fronteiras.test.ts (falha a CI). Duas copias divergiriam em silencio; por isso ha um teste que compara as duas leituras.",
+  "_leia": "Fonte única das duas regras mecânicas do projeto. Consumida por .claude/hooks/guarda-regras.mjs (bloqueia a escrita) e por tests/arquitetura/fronteiras.test.ts (falha a CI). Duas cópias divergiriam em silêncio; por isso há um teste que compara as duas leituras.",
   "regra2_tiposDeDocumentoProibidos": {
-    "porque": "CLAUDE.md regra 2, ADR-008, fato (f): o front-end nao conhece nenhum tipo de documento. Rotulos, campos, mascaras, ordem e obrigatoriedade vem de GET /tipos-documento. Um 'if' com o nome de um tipo transforma toda mudanca de prompt em ciclo de desenvolvimento.",
+    "porque": "CLAUDE.md regra 2, ADR-008, fato (f): o front-end não conhece nenhum tipo de documento. Rótulos, campos, máscaras, ordem e obrigatoriedade vêm de GET /tipos-documento. Um 'if' com o nome de um tipo transforma toda mudança de prompt em ciclo de desenvolvimento.",
     "ondeVale": "src/, exceto src/mocks/",
-    "atencao": "CPF e CNPJ NAO estao nesta lista. Sao TIPOS DE DADO, e o registry existe para conhece-los. A distincao entre tipo de dado e tipo de documento e o ponto inteiro da ADR-008.",
+    "atencao": "CPF e CNPJ NÃO estão nesta lista. São TIPOS DE DADO, e o registry existe para conhecê-los. A distinção entre tipo de dado e tipo de documento é o ponto inteiro da ADR-008.",
     "termos": [
       "RG",
       "carteira_de_identidade",
@@ -17,7 +17,7 @@
     ]
   },
   "regra3_redeSoEmUmLugar": {
-    "porque": "CLAUDE.md regra 3, ADR-002: uma unica costura de rede. Um fetch solto num componente escapa da politica de retry, do cabecalho de identidade e da sanitizacao de erro — e a politica de retry e o que impede repetir uma chamada COBRADA (fato a).",
+    "porque": "CLAUDE.md regra 3, ADR-002: uma única costura de rede. Um fetch solto num componente escapa da política de retry, do cabeçalho de identidade e da sanitização de erro — e a política de retry é o que impede repetir uma chamada COBRADA (fato a).",
     "ondeVale": "src/, exceto src/shared/api/",
     "padrao": "fetch("
   }

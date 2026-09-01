@@ -19,7 +19,7 @@ jobs:
           node-version: "22"
           cache: npm
 
-      # `npm ci` e nao `npm install`: instala exatamente o lock, que e o que o
+      # `npm ci` e não `npm install`: instala exatamente o lock, que é o que o
       # README manda outra pessoa rodar.
       - run: npm ci
 
@@ -29,21 +29,21 @@ jobs:
       - name: Tipos em modo estrito
         run: npm run typecheck
 
-      # As guardas de arquitetura (nenhum tipo de documento no front, uma unica
-      # costura de rede, entities puro) vivem aqui dentro. E este passo que faz
+      # As guardas de arquitetura (nenhum tipo de documento no front, uma única
+      # costura de rede, entities puro) vivem aqui dentro. É este passo que faz
       # a regra 2 do CLAUDE.md deixar de depender de boa vontade.
       - name: Testes
         run: npm test
 
-      # O README afirma que os tipos sao GERADOS do contrato e nunca escritos a
-      # mao (regra 1). Ate aqui isso era honra; agora e verificado: se alguem
+      # O README afirma que os tipos são GERADOS do contrato e nunca escritos à
+      # mão (regra 1). Até aqui isso era palavra; agora é verificado: se alguém
       # editar types.gen.ts sem tocar no openapi.yaml, ou mudar o contrato sem
-      # regerar, o diff nao vem vazio e a CI cai.
+      # regerar, o diff não vem vazio e a CI cai.
       - name: Os tipos correspondem ao contrato
         run: |
           npm run gen:api
           if ! git diff --exit-code -- src/shared/api/types.gen.ts; then
-            echo "::error file=src/shared/api/types.gen.ts::Os tipos gerados divergem de docs/spec/openapi.yaml. Rode 'npm run gen:api' e faca commit do resultado."
+            echo "::error file=src/shared/api/types.gen.ts::Os tipos gerados divergem de docs/spec/openapi.yaml. Rode 'npm run gen:api' e faça commit do resultado."
             exit 1
           fi
 
